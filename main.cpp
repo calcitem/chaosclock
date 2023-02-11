@@ -13,8 +13,6 @@
 // 如果有一方把己方棋子全部放到“正位”，为“赢棋”；
 // 如果对方接下来也达成将己方棋子放到“正位”，则为“双赢”；
 // 如果某一方最后一步是落子吃棋，则是此方“赢棋”。
-//
-// TODO: 當甲方落子吃到一個單數棋子時，仍由甲方續續行動，這是不對的。
 
 #include <iostream>     // std::cout, std::endl
 #include <iomanip>      // std::setw
@@ -24,6 +22,8 @@
 #include <algorithm>
 
 using namespace std;
+
+//#define TEST_MODE
 
 // 本游戏为二人游戏，游戏双方分别被称作甲方和乙方。
 enum Color {
@@ -117,6 +117,9 @@ public:
     // 游戏结果
     GameResult result { GameResult::none };
 
+    // 历史着法
+    vector<int> moveList;
+
     Position()
     {
         initBoard();
@@ -177,6 +180,9 @@ public:
         // 初始时手上无棋子
         inHand.clear();
 
+        // 清空历史
+        moveList.clear();
+
         // 初始化棋子
         for (int i = 0; i < 12; ++i) {
             board[i] = i;
@@ -192,6 +198,28 @@ public:
             int j = dist(rng);
             std::swap(board[i],board[j]);
         }
+
+#ifdef TEST_MODE
+        int testBoard[] = {
+            1,
+            6,
+            3,
+            7,
+            4,
+            9,
+            8,
+            11,
+            5,
+            10,
+            0,
+            2,
+        };
+
+        // 载入写死的用于测试的棋盘
+        for (int i = 0; i < 12; ++i) {
+            board[i] = testBoard[i];
+        }
+#endif // TEST_MODE
     }
 
     PieceStatus getStatus(int number)
@@ -221,7 +249,7 @@ public:
         // 如果这个空位上有其它棋子，这个棋子就被吃掉了。
         // 如果落子时吃掉了对方的棋子，则己方多一次行棋的机会，否则就换对方继续行棋
         int location = number;
-        if (remove(location, number)) {
+        if (remove(location, number) == false) {
             changeSideToMove();
         }
 
@@ -262,14 +290,20 @@ public:
         return GameStatus::ok;
     }
 
-    // 使用 number 的己方棋子吃掉对方位于 location 的棋子, 如确实吃掉了子，返回 true
+    // 使用 number 的己方棋子吃掉对方位于 location 的棋子, 如确实吃掉了对方子，返回 true
     bool remove(int location, int number)
     {
         bool ret = false;
+        int pc = board[location];
 
-        if (board[location] != -1) {
-            inHand.push_back(board[location]);
-            ret = true;
+        // 如果目标位置有子，即此次行棋确实是吃子，而不是放在空位上
+        if (pc != -1) {
+            inHand.push_back(pc);
+
+            // 如果吃掉的不是自己的棋子
+            if (pc % 2 != sideToMove) {
+                ret = true;
+            }            
         }
 
         board[location] = number;
@@ -421,6 +455,17 @@ public:
         cout << endl;
     }
 
+    void printMoveList()
+    {
+        cout << "历史着法: ";
+
+        for (const auto& element : moveList) {
+            cout << element << " ";
+        }
+
+        cout << endl;
+    }
+
     void printSideToMove()
     {
         cout << "\n--------------------------------------------------" << endl
@@ -439,6 +484,7 @@ public:
         printClock();
         printPiecesOnBoard();
         printPiecesInHand();
+        printMoveList();
         printSideToMove();
     }
 };
@@ -472,6 +518,7 @@ int main()
         }
 
         GameStatus status = position.doMove(number);
+        position.moveList.push_back(number);
         status = position.checkIfGameIsOver(status);
 
         if (status != GameStatus::ok) {
