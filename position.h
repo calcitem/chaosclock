@@ -16,16 +16,16 @@ using namespace std;
 
 const string gameStatusStr[] = {
     "",
-    "输入的范围错误。请输入 0-11，或者 -1，其中 0 表示 12，-1 表示放弃此轮行棋机会。",
-    "对方上一步刚走过的棋子，己方在这一步不能再重复拿来走。",
-    "不能拿对方的子来落子",
-    "处于“正位”的棋子，不能再移动。",
-    "处于“正位”的棋子，不能被吃掉。",
-    "甲方赢棋。",
-    "乙方赢棋。",
-    "甲乙双方接连归于正位，双赢。",
-    "甲乙双方接连放弃行棋，双输。",
-    "未知",
+    "The input range is incorrect. Please enter 0-11 or -1, where 0 represents 12, and -1 represents giving up this turn.",
+    "The opponent just moved a piece in the last step, and you cannot use it again in this step.",
+    "You cannot use your opponent's pieces to make a move.",
+    "Pieces that are fixed cannot be moved anymore.",
+    "Pieces that are fixed cannot be removed anymore.",
+    "Player One win!",
+    "Player Two win!",
+    "Both players have been fixed in turn, resulting in a both win.",
+    "Both players have given up their turns consecutively, resulting in a both lose.",
+    "Unknown",
 };
 
 /// StateInfo struct stores information needed to restore a Position object to
@@ -398,7 +398,7 @@ public:
 
     void printPiecesOnBoard()
     {
-        cout << "棋盘上有的棋子: ";
+        cout << "Pieces on board: ";
 
         for (int i = 0; i < 12; i++) {
             if (board[i] == i) {
@@ -413,7 +413,7 @@ public:
 
     void printPiecesInHand()
     {
-        cout << "双方手中的棋子: ";
+        cout << "Pieces on hand: ";
 
         for (const auto& element : inHand) {
             if (element == -1) {
@@ -432,7 +432,7 @@ public:
 
     void printMoveList()
     {
-        cout << "历史着法: ";
+        cout << "Move list: ";
 
         for (const auto& element : moveList) {
             cout << element << " ";
@@ -447,9 +447,9 @@ public:
              << endl;
 
         if (sideToMove == JIA) {
-            cout << "下面轮到“甲方”行棋。" << endl;
+            cout << "It's now Player One's turn to play." << endl;
         } else {
-            cout << "下面轮到“乙方”行棋。" << endl;
+            cout << "It's now Player Two's turn to play." << endl;
         }
     }
 

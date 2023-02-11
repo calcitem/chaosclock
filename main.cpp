@@ -47,7 +47,7 @@ public:
 int main()
 {
     Position position;
-    cout << "混乱时钟游戏开始。" << endl << endl;
+    cout << "Chaos Clock" << endl << endl;
     position.print();
     position.step = 0;
 
@@ -55,12 +55,12 @@ int main()
         position.step++;
         int number;
 
-        cout << "请输入要移动或摆放的棋子编号，不走请输入 -1： ";
+        cout << "Enter the number of the piece you want to move or place, enter -1 if you do not want to move: ";
         cin >> number;
 
         // 处理输入非法的情况
         if (cin.fail()) {
-            cout << "\n输入格式错误！" << endl;
+            cout << "\nInput format error!" << endl;
             cin.clear();
             // 在读入时忽略掉输入流中的前 10000 个字符，直到遇到换行符为止。
             // 这个函数通常用于在读入之后清除输入缓存，以便在读入失败的情况下继续执行程序。
@@ -88,7 +88,7 @@ int main()
         position.print();
     }
 
-    cout << "恭喜完成游戏！" << endl;
+    cout << "Congratulations on completing the game!" << endl;
 
     system("pause");
     return 0;
