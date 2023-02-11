@@ -17,6 +17,8 @@
 #ifndef STACK_H_INCLUDED
 #define STACK_H_INCLUDED
 
+#include <cstring>
+
 namespace ChaosClock {
 
 template <typename T, size_t capacity = 128>
@@ -48,7 +50,7 @@ public:
     void push(const T &obj)
     {
         p++;
-        memcpy(arr + p, &obj, sizeof(T));
+        std::memcpy(arr + p, &obj, sizeof(T));
     }
 
     void push_back(const T &obj)

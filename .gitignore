@@ -412,7 +412,7 @@ shortKnotValue.dat
 settings.ini
 
 # Executable files
-src/sanmill
+src/choasclock
 
 # Sourcetrail files
 *.srctrl*

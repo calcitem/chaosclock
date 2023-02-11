@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <cstring>
+
 #include "position.h"
 #include "config.h"
 #include "stack.h"
@@ -22,6 +24,6 @@
 /// be restored to exactly the same state as before the move was made.
 void Position::undo_move(ChaosClock::Stack<Position>& ss)
 {
-    memcpy(this, ss.top(), sizeof(Position));
+    std::memcpy(this, ss.top(), sizeof(Position));
     ss.pop();
 }

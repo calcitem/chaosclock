@@ -72,7 +72,7 @@
 
 ## Linux
 
-执行 `./build.sh`。
+执行 `make all`。
 
 ## Windows
 
