@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "position.h"
 #include "evaluate.h"
 
 namespace {
@@ -42,7 +43,25 @@ Value Evaluation::value() const
 {
     Value value = VALUE_ZERO;
 
-    // TODO: Implement it
+    
+    switch (pos.result) {
+    case GameResult::bothLost:
+        value = VALUE_BOTH_LOSE;
+        break;
+    case GameResult::bothWin:
+        value = VALUE_BOTH_WIN;
+        break;
+    case GameResult::jiaWin:
+        value = VALUE_WIN;
+        break;
+    case GameResult::yiWin:
+        value = VALUE_LOSE;
+        break;
+    case GameResult::none:
+        // TODO: Implement it
+        value = VALUE_LOSE;
+        break;
+    }
 
     return value;
 }
