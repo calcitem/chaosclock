@@ -51,7 +51,7 @@ enum class GameStatus {
     errCannotMoveFixedPiece,
     errCannotRemoveFixedPiece,
     resultJiaWin,
-    resultJYiWin,
+    resultYiWin,
     resultBothWin,
     resultBothLost,
     unknown,
@@ -73,8 +73,8 @@ static const string gameStatusStr[] = {
 
 enum class GameResult {
     none,
-    win,
-    lost,
+    jiaWin,
+    yiWin,
     bothWin,
     bothLost,
 };
@@ -119,6 +119,10 @@ public:
 
     // 历史着法
     vector<int> moveList;
+
+    // 是否有一方已经赢了
+    bool jiaHasWon { false };
+    bool yiHasWon { false };
 
     Position()
     {
@@ -303,7 +307,7 @@ public:
             // 如果吃掉的不是自己的棋子
             if (pc % 2 != sideToMove) {
                 ret = true;
-            }            
+            }
         }
 
         board[location] = number;
@@ -385,11 +389,37 @@ public:
             return GameStatus::resultBothLost;
         }
 
-        // TODO: 这段判断甲方还是乙方获胜的逻辑暂未实现
+        // TODO: 这段很不简洁，需要重构
         if (jiaIsFixed()) {
+            if (jiaHasWon == true) {
+                // 如果甲方早就赢了但乙方没能赢，那么就只有甲方赢，不会是双赢
+                result = GameResult::jiaWin;
+                return GameStatus::resultJiaWin;
+            } else {
+                jiaHasWon = true;
+            }
+
+            if (sideToMove == JIA) {
+                // 如甲赢了且接下来还是甲走棋，甲肯定单独赢了，不会是双赢
+                result = GameResult::jiaWin;
+                return GameStatus::resultJiaWin;
+            }
         }
 
         if (yiIsFixed()) {
+            if (yiHasWon == true) {
+                // 如果乙方早就赢了但甲方没能赢，那么就只有乙方赢，不会是双赢
+                result = GameResult::yiWin;
+                return GameStatus::resultYiWin;
+            } else {
+                yiHasWon = true;
+            }
+
+            if (sideToMove == YI) {
+                // 如乙赢了且接下来还是乙走棋，乙肯定单独赢了，不会是双赢
+                result = GameResult::yiWin;
+                return GameStatus::resultYiWin;
+            }
         }
 
         return status;
