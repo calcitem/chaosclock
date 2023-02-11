@@ -1,12 +1,12 @@
-﻿// This file is part of Sanmill.
-// Copyright (C) 2019-2023 The Sanmill developers (see AUTHORS file)
+﻿// This file is part of ChaosClock.
+// Copyright (C) 2023 The ChaosClock developers (see AUTHORS file)
 //
-// Sanmill is free software: you can redistribute it and/or modify
+// ChaosClock is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Sanmill is distributed in the hope that it will be useful,
+// ChaosClock is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
@@ -29,7 +29,7 @@ Move bestMove { MOVE_NONE };
 Value bestvalue { VALUE_ZERO };
 Value lastvalue { VALUE_ZERO };
 
-Value qsearch(Position *pos, Sanmill::Stack<Position> &ss, Depth depth,
+Value qsearch(Position *pos, ChaosClock::Stack<Position> &ss, Depth depth,
               Value alpha, Value beta);
 
 /// search() is the main iterative deepening loop. It calls search()
@@ -38,7 +38,7 @@ Value qsearch(Position *pos, Sanmill::Stack<Position> &ss, Depth depth,
 
 int search()
 {
-    Sanmill::Stack<Position> ss;
+    ChaosClock::Stack<Position> ss;
 
     Value value = VALUE_ZERO;
     const Depth d = SEARCH_DEPTH;
@@ -55,7 +55,7 @@ int search()
     return 0;
 }
 
-Value qsearch(Position *pos, Sanmill::Stack<Position> &ss, Depth depth,
+Value qsearch(Position *pos, ChaosClock::Stack<Position> &ss, Depth depth,
               Value alpha, Value beta)
 {
     Value value;

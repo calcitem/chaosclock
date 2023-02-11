@@ -1,4 +1,20 @@
-﻿// 这是 “混乱时钟” 游戏的 C++ 实现。
+﻿// This file is part of ChaosClock.
+// Copyright (C) 2023 The ChaosClock developers (see AUTHORS file)
+//
+// ChaosClock is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// ChaosClock is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+// 这是 “混乱时钟” 游戏的 C++ 实现。
 // 在这个游戏中，两个玩家通过移动棋子在棋盘上的 12 个位置上进行对决。
 // “混乱时钟”游戏是一个二人对弈游戏，双方分别称作甲方和乙方。
 // 棋盘是顺时针编号为1到12的圆形棋盘，初始状态下有12颗棋子随机分配在12个空位上，
@@ -27,20 +43,6 @@
 #include "position.h"
 
 using namespace std;
-
-
-
-#if 0
-class Piece {
-public:
-    int location {-1};
-    int number {0};
-
-    PieceStatus getStatus() {
-        return location == -1 ? PieceStatus::inHand : PieceStatus::onBoard;
-    }
-};
-#endif
 
 // 在 main 函数中，使用循环不断执行玩家的落子操作，直到游戏结束。
 // 如果玩家的输入不合法，则给出错误提示。
