@@ -1,4 +1,4 @@
-﻿// This file is part of ChaosClock.
+// This file is part of ChaosClock.
 // Copyright (C) 2023 The ChaosClock developers (see AUTHORS file)
 //
 // ChaosClock is free software: you can redistribute it and/or modify
@@ -41,10 +41,9 @@ MovePicker::MovePicker(Position &p) noexcept
 /// for sorting.
 void MovePicker::score()
 {
-    cur = moves;
-
-    while (cur++->move != MOVE_NONE) {
-        cur->value = 0; // TODO: Implement
+    // TODO: Implement
+    for (int i = 0; i < MAX_MOVES; i++) {
+        moves[i].value = VALUE_ZERO;
     }
 }
 
@@ -54,6 +53,13 @@ void MovePicker::score()
 /// list of generated moves.
 Move MovePicker::next_move()
 {
+    // ExtMove initMove = {MOVE_NONE, 0};
+    // std::memset(moves, initMove, sizeof(moves)); // TODO: Why cannot set value?
+    for (int i = 0; i < MAX_MOVES; i++) {
+        moves[i].move = MOVE_NONE;
+        moves[i].value = VALUE_ZERO;
+    }
+
     endMoves = generate(pos, moves);
     moveCount = static_cast<int>(endMoves - moves);
 

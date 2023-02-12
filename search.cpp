@@ -22,14 +22,14 @@
 
 using Eval::evaluate;
 
-Position *rootPos {nullptr};
+Position rootPos;
 
 Depth originDepth {SEARCH_DEPTH};
 Move bestMove {MOVE_NONE};
 Value bestvalue {VALUE_ZERO};
 Value lastvalue {VALUE_ZERO};
 
-Value qsearch(Position *pos, ChaosClock::Stack<Position> &ss, Depth depth,
+Value qsearch(Position *pos, Depth depth,
               Value alpha, Value beta);
 
 void go(Position *pos)
@@ -62,15 +62,16 @@ begin:
 #endif
 }
 
+ChaosClock::Stack<Position> ss;
+
 /// start_thinking() is the main iterative deepening loop. It calls search()
 /// repeatedly with increasing depth until the allocated thinking time has been
 /// consumed, the user stops the search, or the maximum search depth is reached.
 
 int start_thinking(Position *pos)
 {
-    rootPos = pos;
-
-    ChaosClock::Stack<Position> ss;
+    //rootPos = pos;
+    std::memcpy(&rootPos, pos, sizeof(Position));
 
     Value value = VALUE_ZERO;
     const Depth d = SEARCH_DEPTH;
@@ -78,15 +79,17 @@ int start_thinking(Position *pos)
     Value alpha = VALUE_NONE;
     Value beta = VALUE_NONE;
 
-    value = qsearch(rootPos, ss, d, alpha, beta);
+    value = qsearch(&rootPos, d, alpha, beta);
 
     lastvalue = bestvalue;
     bestvalue = value;
 
+    ss.clear();
+
     return 0;
 }
 
-Value qsearch(Position *pos, ChaosClock::Stack<Position> &ss, Depth depth,
+Value qsearch(Position *pos, Depth depth,
               Value alpha, Value beta)
 {
     Value value;
@@ -131,13 +134,23 @@ Value qsearch(Position *pos, ChaosClock::Stack<Position> &ss, Depth depth,
         const Move move = mp.moves[i].move;
 
         // Make and search the move
-        pos->do_move(move);
+        switch (pos->do_move(move)) {
+        case GameStatus::errorOutOfRange:
+        case GameStatus::errCannotMoveLastMovedPiece:
+        case GameStatus::errCannotPlaceOpponentsPiece:
+        case GameStatus::errCannotMoveFixedPiece:
+        case GameStatus::errCannotRemoveFixedPiece:
+            continue;
+        default:
+            break;
+        }
+
         const Color after = pos->sideToMove;
 
         if (after != before) {
-            value = -qsearch(pos, ss, depth - 1, -beta, -alpha);
+            value = -qsearch(pos, depth - 1, -beta, -alpha);
         } else {
-            value = qsearch(pos, ss, depth - 1, alpha, beta);
+            value = qsearch(pos, depth - 1, alpha, beta);
         }
 
         pos->undo_move(ss);

@@ -41,8 +41,13 @@
 
 #include "types.h"
 #include "position.h"
+#include "search.h"
 
 using namespace std;
+
+const bool isAi[] = {
+    false /* 乙方 */, true /* 甲方 */
+};
 
 Move humanToGo() {
     int number;
@@ -68,10 +73,20 @@ begin:
     return (Move)number;
 }
 
+Move engineToGo(Position *pos)
+{
+    cout << "AI is thinking...";
+    start_thinking(pos);
+    cout << "AI's move is: " << (int)bestMove;
+
+    return bestMove;
+}
+
 // 在 main 函数中，使用循环不断执行玩家的落子操作，直到游戏结束。
 // 如果玩家的输入不合法，则给出错误提示。
 int main()
 {
+    Move move = MOVE_NONE;
     Position position;
     position.initBoard();
 
@@ -82,7 +97,11 @@ int main()
     for (;;) {
         position.step++;
 
-        Move move = humanToGo();
+        if (isAi[position.sideToMove]) {
+            move = engineToGo(&position);
+        } else {
+            move = humanToGo();
+        }
 
         GameStatus status = position.do_move(move);
         position.moveList.push_back(move); // TODO: Do not push back err

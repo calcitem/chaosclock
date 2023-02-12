@@ -1,4 +1,4 @@
-﻿// This file is part of ChaosClock.
+// This file is part of ChaosClock.
 // Copyright (C) 2023 The ChaosClock developers (see AUTHORS file)
 //
 // ChaosClock is free software: you can redistribute it and/or modify
@@ -29,7 +29,9 @@ public:
 
     Stack(const Stack &other) { *this = other; }
 
-    ~Stack() { delete[] arr; }
+    ~Stack() {
+        delete[] arr;
+    }
 
     Stack &operator=(const Stack &other)
     {
@@ -57,8 +59,6 @@ public:
     {
         p++;
         arr[p] = obj;
-
-        assert(p < capacity);
     }
 
     void pop() { p--; }
@@ -84,6 +84,16 @@ public:
         }
 
         p--;
+    }
+
+    void remove(T entry)
+    {
+        for (int i = 0; i <= p; i++) {
+            if (arr[i] == entry) {
+                erase(i);
+                return;
+            }
+        }
     }
 
 private:

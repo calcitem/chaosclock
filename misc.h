@@ -1,4 +1,4 @@
-﻿// This file is part of ChoasClock.
+// This file is part of ChoasClock.
 // Copyright (C) 2023 The ChaosClock developers (see AUTHORS file)
 //
 // ChaosClock is free software: you can redistribute it and/or modify
@@ -25,7 +25,5 @@
 #include <vector>
 
 #include "types.h"
-
-void remove_first_element_with_value(std::vector<int>& arr, int n);
 
 #endif // #ifndef MISC_H_INCLUDED

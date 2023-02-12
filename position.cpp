@@ -25,6 +25,7 @@ bool Position::reset()
     gamePly = 0;
     st.rule50 = 0;
 
+    std::memset(board, NO_PIECE, sizeof(board));
     inHand.clear();
     lastMove = -2;
     step = 0;
@@ -111,7 +112,7 @@ GameStatus Position::place(int number)
 
     lastMove = number;
 
-    remove_first_element_with_value(inHand, number);
+    inHand.remove(number);
 
     return GameStatus::ok;
 }
@@ -372,17 +373,19 @@ void Position::printPiecesOnBoard()
 
 void Position::printPiecesInHand()
 {
-    cout << "Pieces on hand: ";
+    cout << "Pieces in hand: ";
 
-    for (const auto &element : inHand) {
-        if (element == -1) {
-            cout << "{" << element << "} ";
-        } else if (element > 0 && element % 2 == 1) {
-            cout << "(" << element << ") ";
-        } else if (element >= 0 && element % 2 == 0) {
-            cout << "[" << element << "] ";
+    for (int i = 0; i < inHand.size(); i++) {
+        auto pc = inHand[i];
+
+        if (pc == -1) {
+            cout << "{" << pc << "} ";
+        } else if (pc > 0 && pc % 2 == 1) {
+            cout << "(" << pc << ") ";
+        } else if (pc >= 0 && pc % 2 == 0) {
+            cout << "[" << pc << "] ";
         } else {
-            cout << element << "? ";
+            cout << pc << "? ";
         }
     }
 
@@ -393,8 +396,8 @@ void Position::printMoveList()
 {
     cout << "Move list: ";
 
-    for (const auto &element : moveList) {
-        cout << element << " ";
+    for (int i = 0; i < moveList.size(); i++) {
+        cout << moveList[i] << " ";
     }
 
     cout << endl;

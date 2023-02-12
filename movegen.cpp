@@ -30,15 +30,15 @@ ExtMove *generate(Position &pos, ExtMove *moveList)
     }
 
     if (pos.sideToMove == JIA) {
-        for (auto i : pos.inHand) {
-            if (i % 2 == 1) {
-                *cur++ = (Move)i;
+        for (int i = 0; i < pos.inHand.size(); i++) {
+            if (pos.inHand[i] % 2 == 1) {
+                *cur++ = (Move)pos.inHand[i];
             }
         }
     } else {
-        for (auto i : pos.inHand) {
-            if (i % 2 == 0) {
-                *cur++ = (Move)i;
+        for (int i = 0; i < pos.inHand.size(); i++) {
+            if (pos.inHand[i] % 2 == 0) {
+                *cur++ = (Move)pos.inHand[i];
             }
         }
     }

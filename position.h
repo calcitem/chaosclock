@@ -24,7 +24,6 @@
 #include <string>
 #include <vector>
 
-#include "misc.h"
 #include "stack.h"
 #include "types.h"
 
@@ -62,7 +61,7 @@ public:
     int board[12] { -1 };
 
     // 在双方手上的棋子
-    vector<int> inHand;
+    ChaosClock::Stack<int> inHand;
 
     // 上次的着法
     int lastMove { -2 };
@@ -80,7 +79,7 @@ public:
     GameResult result { GameResult::none };
 
     // 历史着法
-    vector<int> moveList;
+    ChaosClock::Stack<int> moveList;
 
     // 棋局状态
     StateInfo st;
@@ -93,6 +92,11 @@ public:
     {
         reset();
     }
+
+//     ~Position()
+//     {
+//         reset();
+//     }
 
     Position(const Position &) = delete;
     Position &operator=(const Position &) = delete;

@@ -1,4 +1,4 @@
-﻿// This file is part of ChaosClock.
+// This file is part of ChaosClock.
 // Copyright (C) 2023 The ChaosClock developers (see AUTHORS file)
 //
 // ChaosClock is free software: you can redistribute it and/or modify
@@ -45,9 +45,3 @@ using fun3_t = bool (*)(HANDLE, CONST GROUP_AFFINITY *, PGROUP_AFFINITY);
 #include <vector>
 
 #include "misc.h"
-
-void remove_first_element_with_value(std::vector<int>& arr, int n)
-{
-    auto new_end = std::remove(arr.begin(), arr.end(), n);
-    arr.erase(new_end, arr.end());
-}
