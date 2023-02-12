@@ -1,4 +1,4 @@
-﻿// This file is part of ChaosClock.
+// This file is part of ChaosClock.
 // Copyright (C) 2023 The ChaosClock developers (see AUTHORS file)
 //
 // ChaosClock is free software: you can redistribute it and/or modify
@@ -21,12 +21,29 @@ ExtMove *generate(Position &pos, ExtMove *moveList)
 {
     ExtMove *cur = moveList;
 
-    pos = pos; // TODO: For suppress build warning
-    
-    for (int m = -1; m < 12; ++m) {
-        // TODO: Filter bad moves
-        *cur++ = (Move)m;
+    // TODO: performance
+
+    for (int i = 0; i < 12; i++) {
+        if (pos.board[i] != -1) {
+            *cur++ = (Move)(pos.board[i]);
+        }
     }
+
+    if (pos.sideToMove == JIA) {
+        for (auto i : pos.inHand) {
+            if (i % 2 == 1) {
+                *cur++ = (Move)i;
+            }
+        }
+    } else {
+        for (auto i : pos.inHand) {
+            if (i % 2 == 0) {
+                *cur++ = (Move)i;
+            }
+        }
+    }
+
+    *cur++ = MOVE_PASS;
 
     return cur;
 }

@@ -1,4 +1,4 @@
-﻿// This file is part of ChaosClock.
+// This file is part of ChaosClock.
 // Copyright (C) 2023 The ChaosClock developers (see AUTHORS file)
 //
 // ChaosClock is free software: you can redistribute it and/or modify
@@ -14,30 +14,62 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <string>
 #include "evaluate.h"
-#include "stack.h"
 #include "movepick.h"
+#include "stack.h"
+#include "search.h"
+#include <string>
 
 using Eval::evaluate;
 
+Position *rootPos {nullptr};
 
-Position* rootPos { nullptr };
-
-Depth originDepth { 0 };
-Move bestMove { MOVE_NONE };
-Value bestvalue { VALUE_ZERO };
-Value lastvalue { VALUE_ZERO };
+Depth originDepth {SEARCH_DEPTH};
+Move bestMove {MOVE_NONE};
+Value bestvalue {VALUE_ZERO};
+Value lastvalue {VALUE_ZERO};
 
 Value qsearch(Position *pos, ChaosClock::Stack<Position> &ss, Depth depth,
               Value alpha, Value beta);
 
-/// search() is the main iterative deepening loop. It calls search()
+void go(Position *pos)
+{
+#ifdef UCI_AUTO_RE_GO
+begin:
+#endif
+
+    start_thinking(pos);
+
+    //     if (pos->get_phase() == Phase::gameOver) {
+    // #ifdef UCI_AUTO_RESTART
+    //         // TODO(calcitem)
+    //         while (true) {
+    //             if (Threads.main()->searching == true) {
+    //                 continue;
+    //             }
+    //
+    //             pos->set(StartFEN, Threads.main());
+    //             Threads.main()->us = WHITE; // WAR
+    //             break;
+    //         }
+    // #else
+    //         return;
+    // #endif
+    //    }
+
+#ifdef UCI_AUTO_RE_GO
+    goto begin;
+#endif
+}
+
+/// start_thinking() is the main iterative deepening loop. It calls search()
 /// repeatedly with increasing depth until the allocated thinking time has been
 /// consumed, the user stops the search, or the maximum search depth is reached.
 
-int search()
+int start_thinking(Position *pos)
 {
+    rootPos = pos;
+
     ChaosClock::Stack<Position> ss;
 
     Value value = VALUE_ZERO;
@@ -45,7 +77,6 @@ int search()
 
     Value alpha = VALUE_NONE;
     Value beta = VALUE_NONE;
-
 
     value = qsearch(rootPos, ss, d, alpha, beta);
 
@@ -61,7 +92,7 @@ Value qsearch(Position *pos, ChaosClock::Stack<Position> &ss, Depth depth,
     Value value;
     Value bestValue = -VALUE_INFINITE;
 
-    if (pos->rule50_count() > BOTH_LOSE_THRESHOLD) {
+    if (pos->st.rule50 > BOTH_LOSE_THRESHOLD) {
         alpha = VALUE_BOTH_LOSE;
         if (alpha >= beta) {
             return alpha;
@@ -104,12 +135,10 @@ Value qsearch(Position *pos, ChaosClock::Stack<Position> &ss, Depth depth,
         const Color after = pos->sideToMove;
 
         if (after != before) {
-            value = -qsearch(pos, ss, depth - 1,
-                -beta, -alpha);
+            value = -qsearch(pos, ss, depth - 1, -beta, -alpha);
         } else {
-            value = qsearch(pos, ss, depth - 1,
-                alpha, beta);
-        }        
+            value = qsearch(pos, ss, depth - 1, alpha, beta);
+        }
 
         pos->undo_move(ss);
 

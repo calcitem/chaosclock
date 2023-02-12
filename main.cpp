@@ -44,36 +44,48 @@
 
 using namespace std;
 
+Move humanToGo() {
+    int number;
+
+begin:
+    cout << "Enter the number of the piece you want to move or place, enter -1 "
+            "if you do not want to move: ";
+    cin >> number;
+
+    // 处理输入非法的情况
+    if (cin.fail()) {
+        cout << "\nInput format error!" << endl;
+        cin.clear();
+        // 在读入时忽略掉输入流中的前 10000 个字符，直到遇到换行符为止。
+        // 这个函数通常用于在读入之后清除输入缓存，以便在读入失败的情况下继续执行程序。
+        // 例如，如果在读入整数时读入了一个字符串，则可能会导致该字符串仍然在缓存中，
+        // 并且后续读入操作仍然会失败。在这种情况下，
+        // 使用 cin.ignore 函数来清除缓存中的数据是很有用的。
+        cin.ignore(10000, '\n');
+        goto begin;
+    }
+
+    return (Move)number;
+}
+
 // 在 main 函数中，使用循环不断执行玩家的落子操作，直到游戏结束。
 // 如果玩家的输入不合法，则给出错误提示。
 int main()
 {
     Position position;
+    position.initBoard();
+
     cout << "Chaos Clock" << endl << endl;
     position.print();
     position.step = 0;
 
     for (;;) {
         position.step++;
-        int number;
 
-        cout << "Enter the number of the piece you want to move or place, enter -1 if you do not want to move: ";
-        cin >> number;
+        Move move = humanToGo();
 
-        // 处理输入非法的情况
-        if (cin.fail()) {
-            cout << "\nInput format error!" << endl;
-            cin.clear();
-            // 在读入时忽略掉输入流中的前 10000 个字符，直到遇到换行符为止。
-            // 这个函数通常用于在读入之后清除输入缓存，以便在读入失败的情况下继续执行程序。
-            // 例如，如果在读入整数时读入了一个字符串，则可能会导致该字符串仍然在缓存中，
-            // 并且后续读入操作仍然会失败。在这种情况下，
-            // 使用 cin.ignore 函数来清除缓存中的数据是很有用的。
-            cin.ignore(10000, '\n');
-        }
-
-        GameStatus status = position.do_move(number);
-        position.moveList.push_back(number);
+        GameStatus status = position.do_move(move);
+        position.moveList.push_back(move); // TODO: Do not push back err
         status = position.checkIfGameIsOver(status);
 
         if (status != GameStatus::ok) {

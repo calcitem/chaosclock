@@ -1,4 +1,4 @@
-﻿// This file is part of ChaosClock.
+// This file is part of ChaosClock.
 // Copyright (C) 2023 The ChaosClock developers (see AUTHORS file)
 //
 // ChaosClock is free software: you can redistribute it and/or modify
@@ -19,13 +19,13 @@
 
 #include <vector>
 
+#include "position.h"
+#include "types.h"
+
 using std::vector;
 
-namespace Search {
+extern Move bestMove;
 
-void init() noexcept;
-void clear();
-
-} // namespace Search
+int start_thinking(Position *pos);
 
 #endif // #ifndef SEARCH_H_INCLUDED
