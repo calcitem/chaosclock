@@ -1,4 +1,4 @@
-﻿// This file is part of ChaosClock.
+// This file is part of ChaosClock.
 // Copyright (C) 2023 The ChaosClock developers (see AUTHORS file)
 //
 // ChaosClock is free software: you can redistribute it and/or modify
@@ -157,7 +157,14 @@ bool Position::remove(int location, int number)
 
     // 如果目标位置有子，即此次行棋确实是吃子，而不是放在空位上
     if (pc != -1) {
+        if (pc < 0) {
+            
+        } 
         inHand.push_back(pc);
+        if (pc < 0) {
+       
+        }
+        //cout << "^" << pc << "^ ";
 
         // 如果吃掉的不是自己的棋子
         if (pc % 2 != sideToMove) {

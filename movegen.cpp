@@ -26,22 +26,34 @@ ExtMove *generate(Position &pos, ExtMove *moveList)
     for (int i = 0; i < 12; i++) {
         if (pos.board[i] != -1) {
             *cur++ = (Move)(pos.board[i]);
+            cout << "cur - moveList (1): " << cur - moveList << endl;
         }
     }
 
     if (pos.sideToMove == JIA) {
         for (int i = 0; i < pos.inHand.size(); i++) {
+            if (pos.inHand[i] < 0) {           
+                break;
+            }
             if (pos.inHand[i] % 2 == 1) {
                 *cur++ = (Move)pos.inHand[i];
             }
         }
     } else {
         for (int i = 0; i < pos.inHand.size(); i++) {
+            if (pos.inHand[i] < 0) {               
+                break;
+            }
             if (pos.inHand[i] % 2 == 0) {
                 *cur++ = (Move)pos.inHand[i];
+                cout << "cur - moveList (2): " << cur - moveList << endl;
+                if (cur - moveList > 13) {
+                                  }
             }
         }
     }
+
+
 
     *cur++ = MOVE_PASS;
 

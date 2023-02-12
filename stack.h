@@ -21,7 +21,7 @@
 
 namespace ChaosClock {
 
-template <typename T, size_t capacity = 128>
+template <typename T, size_t capacity = 512>
 class Stack
 {
 public:
@@ -31,51 +31,95 @@ public:
 
     ~Stack() {
         //delete[] arr;
+        check();
     }
 
     Stack &operator=(const Stack &other)
     {
         memcpy(arr, other.arr, length());
         p = other.p;
+        check();
         return *this;
     }
 
     bool operator==(const T &other) const
     {
+        check();
         return p == other.p && memcmp(arr, other.arr, size());
     }
 
-    T &operator[](int i) { return arr[i]; }
+    T &operator[](int i)
+    {
+        check();
+        return arr[i];
+    }
 
-    const T &operator[](int i) const { return arr[i]; }
+    const T &operator[](int i) const
+    {
+        check();
+
+        return arr[i];
+    }
 
     void push(const T &obj)
     {
         p++;
         std::memcpy(arr + p, &obj, sizeof(T));
+        check();
     }
 
     void push_back(const T &obj)
     {
         p++;
         arr[p] = obj;
+        check();
     }
 
-    void pop() { p--; }
+    void pop() { p--;
+        check();
+    }
 
-    T *top() { return &arr[p]; }
+    T *top()
+    {
+        check();
+        return &arr[p];
+    }
 
-    [[nodiscard]] int size() const { return p + 1; }
+    [[nodiscard]] int size() const
+    {
+        check();
+        return p + 1;
+    }
 
-    [[nodiscard]] size_t length() const { return sizeof(T) * size(); }
+    [[nodiscard]] size_t length() const
+    {
+        check();
+        return sizeof(T) * size();
+    }
 
-    T *begin() { return &arr[0]; }
+    T *begin()
+    {
+        check();
+        return &arr[0];
+    }
 
-    T *end() { return &arr[p + 1]; }
+    T *end()
+    {
+        check();
+        return &arr[p + 1];
+    }
 
-    [[nodiscard]] bool empty() const { return p < 0; }
+    [[nodiscard]] bool empty() const
+    {
+        check();
+        return p < 0;
+    }
 
-    void clear() { p = -1; }
+    void clear()
+    {
+        check();
+        p = -1;
+    }
 
     void erase(int index)
     {
@@ -84,16 +128,29 @@ public:
         }
 
         p--;
+        check();
     }
 
     void remove(T entry)
     {
-        for (int i = 0; i <= p; i++) {
+        for (int i = 0; i < size(); i++) {
             if (arr[i] == entry) {
                 erase(i);
                 return;
             }
         }
+        check();
+    }
+
+    bool check() const {
+        int test = 0;
+        for (int i = 0; i < p+1; i++) {
+            memcpy(&test, (const void*)(arr+i), 4);
+            if (test < -512) {
+                return false;
+            }
+        }
+        return true;
     }
 
 private:

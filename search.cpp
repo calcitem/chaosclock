@@ -130,6 +130,8 @@ Value qsearch(Position *pos, ChaosClock::Stack<Position> &ss, Depth depth,
     // Loop through the moves until no moves remain or a beta cutoff occurs
     for (int i = 0; i < moveCount; i++) {
         ss.push(*pos);
+        //assert(ss.length() < 127);
+        //cout << ss.size() << " ";
         const Color before = pos->sideToMove;
         const Move move = mp.moves[i].move;
 
