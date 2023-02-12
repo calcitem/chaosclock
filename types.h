@@ -33,7 +33,7 @@
 #pragma warning(disable : 4800) // Forcing value to bool 'true' or 'false'
 #endif
 
-constexpr int MAX_MOVES = 13; // 12 + 1 = 13
+constexpr int MAX_MOVES = 16; // 12 + 1 (PASS) + 3 (Avoid Overflow)
 constexpr int MAX_PLY = 48;
 
 enum Move : int8_t { MOVE_NONE = -2, MOVE_PASS = -1 };
