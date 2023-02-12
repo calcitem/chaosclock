@@ -30,7 +30,7 @@ public:
     Stack(const Stack &other) { *this = other; }
 
     ~Stack() {
-        delete[] arr;
+        //delete[] arr;
     }
 
     Stack &operator=(const Stack &other)
