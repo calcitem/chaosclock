@@ -24,7 +24,7 @@ ExtMove *generate(Position &pos, ExtMove *moveList)
     // TODO: performance
 
     for (int i = 0; i < 12; i++) {
-        if (pos.board[i] != -1) {
+        if (pos.board[i] != -1 && i != pos.board[i]) {
             *cur++ = (Move)(pos.board[i]);
         }
     }
