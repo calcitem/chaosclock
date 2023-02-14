@@ -21,7 +21,7 @@
 
 namespace ChaosClock {
 
-template <typename T, size_t capacity = 128>
+template <typename T, size_t capacity = 256>
 class Stack
 {
 public:
@@ -30,7 +30,11 @@ public:
     Stack(const Stack &other) { *this = other; }
 
     ~Stack() {
-        delete[] arr;
+        if (arr != nullptr) {
+            delete[] arr;
+        } 
+        
+        arr = nullptr;
     }
 
     Stack &operator=(const Stack &other)
@@ -97,7 +101,7 @@ public:
     }
 
 private:
-    T *arr;
+    T *arr {nullptr};
     int p {-1};
 };
 
