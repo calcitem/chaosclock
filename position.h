@@ -99,7 +99,23 @@ public:
 //     }
 
     Position(const Position &) = delete;
-    Position &operator=(const Position &) = delete;
+
+    Position &operator=(const Position &other)
+    {
+        memcpy(this->board, other.board, 12);
+        this->inHand = other.inHand;
+        this->lastMove = other.lastMove;
+        this->step = other.step;
+        this->gamePly = other.gamePly;
+        this->sideToMove = other.sideToMove;
+        this->result = other.result;
+        this->moveList = other.moveList;
+        this->st = other.st;
+        this->jiaHasWon = other.jiaHasWon;
+        this->yiHasWon = other.yiHasWon;
+
+        return *this;
+    }
 
     // 交换行棋方
     void changeSideToMove();

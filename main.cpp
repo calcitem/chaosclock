@@ -73,10 +73,10 @@ begin:
     return (Move)number;
 }
 
-Move engineToGo(Position *pos)
+Move engineToGo(const Position &pos)
 {
     cout << "AI is thinking...";
-    start_thinking(pos);
+    start_thinking(&pos);
     cout << "AI's move is: " << (int)bestMove;
 
     return bestMove;
@@ -89,6 +89,7 @@ int main()
     Move move = MOVE_NONE;
     Position position;
     position.initBoard();
+    Position pos;
 
     cout << "Chaos Clock" << endl << endl;
     position.print();
@@ -98,7 +99,9 @@ int main()
         position.step++;
 
         if (isAi[position.sideToMove]) {
-            move = engineToGo(&position);
+            //std::memcpy(&pos, &position, sizeof(Position));
+            pos = position;
+            move = engineToGo(pos);
         } else {
             move = humanToGo();
         }
