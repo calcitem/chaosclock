@@ -143,6 +143,7 @@ GameStatus Position::move(int location, int number)
     changeSideToMove();
 
     // Increment ply counters. In particular
+    // TODO: Remove() has it. No need?
     ++gamePly;
     ++st.pliesFromNull;
 
