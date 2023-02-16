@@ -1,4 +1,4 @@
-﻿// This file is part of ChaosClock.
+// This file is part of ChaosClock.
 // Copyright (C) 2023 The ChaosClock developers (see AUTHORS file)
 //
 // ChaosClock is free software: you can redistribute it and/or modify
@@ -63,7 +63,7 @@ void Position::initBoard()
 
 #ifdef TEST_MODE
     int testBoard[] = {
-        4, 5, 3, 8, 6, 9, 0, 11, 10, 1, 7, 2,
+        6, 11, 8, 9, 5, 4, 1, 10, 7, 0, 2, 3,
     };
 
     // 载入写死的用于测试的棋盘
@@ -410,9 +410,23 @@ void Position::printSideToMove()
          << endl;
 
     if (sideToMove == JIA) {
-        cout << "It's now Player One's turn to play." << endl;
+        std::cout << "   _____" << std::endl;
+        std::cout << "  /     \\" << std::endl;
+        std::cout << " /       \\" << std::endl;
+        std::cout << "(         )" << std::endl;
+        std::cout << "|  O   O  |" << std::endl;
+        std::cout << "|    <    |" << std::endl;
+        std::cout << "|   ---   |" << std::endl;
+        std::cout << " \\_______/" << std::endl;
     } else {
-        cout << "It's now Player Two's turn to play." << endl;
+        std::cout << "  _______" << std::endl;
+        std::cout << " /       \\" << std::endl;
+        std::cout << "|  0   0  |" << std::endl;
+        std::cout << "|    ^    |" << std::endl;
+        std::cout << "|   '-'   |" << std::endl;
+        std::cout << " \\_______/" << std::endl;
+        std::cout << "  |     | " << std::endl;
+        std::cout << "  |     | " << std::endl;
     }
 }
 

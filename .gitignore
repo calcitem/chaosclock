@@ -443,3 +443,4 @@ flutter_export_environment.sh
 
 # Other
 JSON/
+/*.stackdump

@@ -21,9 +21,9 @@
 #pragma execution_character_set("utf-8")
 #endif
 
-// #define TEST_MODE
+#define TEST_MODE
 
-#define SEARCH_DEPTH    12
+#define SEARCH_DEPTH    32
 
 #define BOTH_LOSE_THRESHOLD 100
 
