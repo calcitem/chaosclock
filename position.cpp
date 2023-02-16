@@ -359,7 +359,7 @@ void Position::printClock()
 
 void Position::printPiecesOnBoard()
 {
-    cout << "Pieces on board: ";
+    cout << "On board: ";
 
     for (int i = 0; i < 12; i++) {
         if (board[i] == i) {
@@ -374,7 +374,7 @@ void Position::printPiecesOnBoard()
 
 void Position::printPiecesInHand()
 {
-    cout << "Pieces in hand: ";
+    cout << "In hand: ";
 
     for (int i = 0; i < inHand.size(); i++) {
         auto pc = inHand[i];
@@ -395,7 +395,7 @@ void Position::printPiecesInHand()
 
 void Position::printMoveList()
 {
-    cout << "Move list: ";
+    cout << "\nMove list: ";
 
     for (int i = 0; i < moveList.size(); i++) {
         cout << moveList[i] << " ";
@@ -406,36 +406,38 @@ void Position::printMoveList()
 
 void Position::printSideToMove()
 {
-    cout << "\n--------------------------------------------------" << endl
+    cout << "\n----------------------------------------------------------" << endl
          << endl;
 
     if (sideToMove == JIA) {
-        std::cout << "   _____" << std::endl;
-        std::cout << "  /     \\" << std::endl;
-        std::cout << " /       \\" << std::endl;
-        std::cout << "(         )" << std::endl;
-        std::cout << "|  O   O  |" << std::endl;
-        std::cout << "|    <    |" << std::endl;
-        std::cout << "|   ---   |" << std::endl;
-        std::cout << " \\_______/" << std::endl;
+        cout << "******  ******" << endl;
+        cout << "******  *    *" << endl;
+        cout << "******  *    *" << endl;
+        cout << "******  ******" << endl;
+        cout << endl;
     } else {
-        std::cout << "  _______" << std::endl;
-        std::cout << " /       \\" << std::endl;
-        std::cout << "|  0   0  |" << std::endl;
-        std::cout << "|    ^    |" << std::endl;
-        std::cout << "|   '-'   |" << std::endl;
-        std::cout << " \\_______/" << std::endl;
-        std::cout << "  |     | " << std::endl;
-        std::cout << "  |     | " << std::endl;
+        cout << "******  ******" << endl;
+        cout << "*    *  ******" << endl;
+        cout << "*    *  ******" << endl;
+        cout << "******  ******" << endl;
+        cout << endl;
     }
 }
 
 // 输出当前棋局状态
 void Position::print()
 {
+    if (sideToMove == YI) {
+        //cout << "\033[33m";
+    }
+
     printClock();
     printPiecesOnBoard();
     printPiecesInHand();
     printMoveList();
     printSideToMove();
+
+    if (sideToMove == YI) {
+        //cout << "\033[0m";
+    }
 }
