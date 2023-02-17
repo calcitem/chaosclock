@@ -16,12 +16,12 @@
 
 // This is a C++ implementation of the "Chaos Clock" game.
 // In this game, two players duel by moving pieces on a board with 12 positions.
-// "Chaos Clock" is a two-player game, with each side referred to as "Player A"
-// and "Player B". The board is a circular board numbered clockwise from 1 to
+// "Chaos Clock" is a two-player game, with each side referred to as "White"
+// and "Black". The board is a circular board numbered clockwise from 1 to
 // 12, with 12 random pieces initially distributed on the 12 empty positions.
 // (In the program, for convenience of calculation, position 12 is represented
 // by the number 0.) It is not allowed to have a piece in the "correct
-// position". The order of play is that Player B moves first, and then both
+// position". The order of play is that Black moves first, and then both
 // players take turns moving. There are three types of moves: move a piece, drop
 // a piece, or do not move. "Moving a piece" means picking up any piece on the
 // board, moving it n steps clockwise, and eating the piece on the landing
@@ -50,7 +50,7 @@
 using namespace std;
 
 const bool isAi[] = {
-    false /* YI */, true /* JIA */
+    false, true
 };
 
 Move humanToGo() {

@@ -74,7 +74,7 @@ public:
 
     // Who should play chess now
     // (Order of moves: Party B moves first, and then both sides take turns.)
-    Color sideToMove {YI};
+    Color sideToMove {BLACK};
 
     // game result
     GameResult result {GameResult::none};

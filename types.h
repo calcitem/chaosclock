@@ -45,8 +45,8 @@ enum MoveType {
 };
 
 enum Color : uint8_t {
-    YI = 0,
-    JIA = 1,
+    BLACK = 0,
+    WHITE = 1,
     COLOR_NB = 2,
 };
 
@@ -147,19 +147,19 @@ ENABLE_INCR_OPERATORS_ON(Square)
 
 constexpr Color operator~(Color c)
 {
-    if (c == JIA) {
-        return YI;
+    if (c == WHITE) {
+        return BLACK;
     } else {
-        return JIA;
+        return WHITE;
     }
 }
 
 constexpr Color color_of(Piece pc)
 {
     if (pc % 2 == 0) {
-        return YI;
+        return BLACK;
     } else {
-        return JIA;
+        return WHITE;
     }
 }
 
