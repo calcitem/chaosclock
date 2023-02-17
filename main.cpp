@@ -135,6 +135,14 @@ int main()
 
         if (status != GameStatus::ok) {
             position.showGameStatus(status);
+
+            if (status == GameStatus::errorOutOfRange ||
+                status == GameStatus::errCannotMoveLastMovedPiece ||
+                status == GameStatus::errCannotPlaceOpponentsPiece ||
+                status == GameStatus::errCannotMoveFixedPiece ||
+                status == GameStatus::errCannotRemoveFixedPiece) {
+                continue;
+            }
         }
 
         if (position.result != GameResult::none) {
