@@ -104,7 +104,7 @@ Value qsearch(Position *pos, Depth depth,
         }
     }
 
-    if (pos->result != GameResult::none || depth <= 0) {
+    if (pos->result != GameResult::none /* || depth <= 0 */) {
         bestValue = Eval::evaluate(*pos);
 
         // For win quickly

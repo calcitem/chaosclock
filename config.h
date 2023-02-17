@@ -25,6 +25,6 @@
 
 #define SEARCH_DEPTH    32
 
-#define BOTH_LOSE_THRESHOLD 100
+#define BOTH_LOSE_THRESHOLD 7
 
 #endif // INCLUDE_CONFIG_H_

@@ -1,4 +1,4 @@
-﻿// This file is part of ChaosClock.
+// This file is part of ChaosClock.
 // Copyright (C) 2023 The ChaosClock developers (see AUTHORS file)
 //
 // ChaosClock is free software: you can redistribute it and/or modify
@@ -39,15 +39,14 @@ constexpr int MAX_PLY = 48;
 enum Move : int8_t { MOVE_NONE = -2, MOVE_PASS = -1 };
 
 enum MoveType { 
-    MOVETYPE_MOVE,      // 走子
-    MOVETYPE_PLACE,     // 摆子
-    MOVETYPE_PASS       // 不走，即放弃本次行棋机会，转由对方走棋
+    MOVETYPE_MOVE,
+    MOVETYPE_PLACE,
+    MOVETYPE_PASS
 };
 
-// 本游戏为二人游戏，游戏双方分别被称作甲方和乙方。
 enum Color : uint8_t {
-    YI = 0, // 乙方
-    JIA = 1, // 甲方
+    YI = 0,
+    JIA = 1,
     COLOR_NB = 2,
 };
 
@@ -63,6 +62,7 @@ enum Value : int8_t {
     VALUE_ZERO = 0,
     VALUE_INFINITE = INT8_MAX,
     VALUE_NONE = -VALUE_INFINITE,
+    VALUE_REPEAT = -1,
     VALUE_LOSE = 0,
     VALUE_BOTH_LOSE =30,
     VALUE_BOTH_WIN = 60,

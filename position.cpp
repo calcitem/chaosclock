@@ -287,10 +287,10 @@ bool Position::bothWin()
 
 bool Position::bothLost()
 {
-    // TODO: The current judgment is 100
+    // TODO: The current judgment is BOTH_LOSE_THRESHOLD
     // If the game is not over yet, both sides will lose. Is it possible to
     // judge in advance that neither side can win?
-    return step > 100;
+    return step > BOTH_LOSE_THRESHOLD;
 }
 
 GameStatus Position::checkIfGameIsOver(GameStatus status)
