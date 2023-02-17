@@ -155,7 +155,7 @@ Value qsearch(Position *pos, Depth depth,
             value = qsearch(pos, depth - 1, alpha, beta);
         }
 
-        pos->undo_move(ss);
+        pos->undo_move();
 
         if (value >= bestValue) {
             bestValue = value;

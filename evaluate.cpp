@@ -1,4 +1,4 @@
-﻿// This file is part of ChaosClock.
+// This file is part of ChaosClock.
 // Copyright (C) 2023 The ChaosClock developers (see AUTHORS file)
 //
 // ChaosClock is free software: you can redistribute it and/or modify
@@ -16,6 +16,8 @@
 
 #include "position.h"
 #include "evaluate.h"
+
+extern ChaosClock::Stack<Position> ss;
 
 namespace {
 
@@ -43,6 +45,9 @@ Value Evaluation::value() const
 {
     Value value = VALUE_ZERO;
 
+    if (pos.has_repeat()) {
+        return VALUE_REPEAT;
+    }
     
     switch (pos.result) {
     case GameResult::bothLost:

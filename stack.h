@@ -101,6 +101,15 @@ public:
         }
     }
 
+    int indexOf(T entry) {
+        for (int i = 0; i <= p; i++) {
+            if (!std::memcmp(arr[i], entry, sizeof(T))) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
 private:
     T *arr {nullptr};
     int p {-1};
