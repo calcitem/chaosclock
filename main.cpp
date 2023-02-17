@@ -130,7 +130,7 @@ int main()
         }
 
         GameStatus status = position.do_move(move);
-        position.moveList.push_back(move); // TODO: Do not push back err
+
         status = position.checkIfGameIsOver(status);
 
         if (status != GameStatus::ok) {
@@ -144,6 +144,8 @@ int main()
                 continue;
             }
         }
+
+        position.moveList.push_back(move);
 
         if (position.result != GameResult::none) {
             break;
