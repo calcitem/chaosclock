@@ -39,7 +39,7 @@ const string gameStatusStr[] = {
     "Player One win!",
     "Player Two win!",
     "Both players have been fixed in turn, resulting in a both win.",
-    "Both players have given up their turns consecutively, resulting in a both lose.",
+    "Both players have given up their turns consecutively, or because rule 50, resulting in a both lose.",
     "Unknown",
 };
 

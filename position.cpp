@@ -171,6 +171,7 @@ bool Position::remove(int location, int number)
         if (pc % 2 != sideToMove) {
             ret = true;
             ++st.pliesFromNull;
+            st.rule50++;
         }
     }
 
@@ -191,6 +192,8 @@ GameStatus Position::do_move(int number)
     if (!isOk(number)) {
         return GameStatus::errorOutOfRange;
     }
+
+    st.rule50++;
 
     // Either side can voluntarily give up the move of this round, and it is the
     // opponent's turn to move.
@@ -290,7 +293,7 @@ bool Position::bothLost()
     // TODO: The current judgment is BOTH_LOSE_THRESHOLD
     // If the game is not over yet, both sides will lose. Is it possible to
     // judge in advance that neither side can win?
-    return step > BOTH_LOSE_THRESHOLD;
+    return st.rule50 > BOTH_LOSE_THRESHOLD;
 }
 
 GameStatus Position::checkIfGameIsOver(GameStatus status)
