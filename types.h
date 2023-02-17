@@ -52,10 +52,10 @@ enum Color : uint8_t {
 
 enum class GameResult {
     none,
-    jiaWin,
-    yiWin,
+    win,
+    lose,
     bothWin,
-    bothLost,
+    bothLose,
 };
 
 enum Value : int8_t {
@@ -184,10 +184,10 @@ enum class GameStatus {
     errCannotPlaceOpponentsPiece,
     errCannotMoveFixedPiece,
     errCannotRemoveFixedPiece,
-    resultJiaWin,
-    resultYiWin,
+    resultWin,
+    resultLose,
     resultBothWin,
-    resultBothLost,
+    resultBothLose,
     unknown,
 };
 

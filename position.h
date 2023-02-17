@@ -86,8 +86,7 @@ public:
     StateInfo st;
 
     // Whether one side has already won
-    bool jiaHasWon {false};
-    bool yiHasWon {false};
+    bool haveWon[COLOR_NB] {false, false};
 
     Position()
     {
@@ -112,8 +111,7 @@ public:
         this->result = other.result;
         this->moveList = other.moveList;
         this->st = other.st;
-        this->jiaHasWon = other.jiaHasWon;
-        this->yiHasWon = other.yiHasWon;
+        memcpy(this->haveWon, other.haveWon, sizeof(haveWon));
 
         return *this;
     }
@@ -127,11 +125,8 @@ public:
     // Determine whether there is a chess piece in the upright position
     bool hasFixedPiece();
 
-    // Party B's chess pieces are all placed in the "right position"
-    bool yiIsFixed();
-
-    // Party A's chess pieces are all placed in the "right position"
-    bool jiaIsFixed();
+    // Pieces are all placed in the "right position"
+    bool isAllFixed(Color c);
 
     // In the initial state, chess pieces numbered 1 to 12 are randomly assigned
     // and placed on 12 empty positions on the board.

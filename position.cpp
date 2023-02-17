@@ -34,7 +34,7 @@ bool Position::reset()
     sideToMove = YI;
     result = GameResult::none;
     moveList.clear();
-    jiaHasWon = yiHasWon = false;
+    haveWon[JIA] = haveWon[YI] = false;
 
     return true;
 }
@@ -203,8 +203,8 @@ GameStatus Position::do_move(int number)
         // If Party A and Party B give up playing chess one after another, both
         // sides will be judged to lose, which is also a "lose-lose".
         if (lastMove == -1) {
-            result = GameResult::bothLost;
-            return GameStatus::resultBothLost;
+            result = GameResult::bothLose;
+            return GameStatus::resultBothLose;
         }
 
         changeSideToMove();
@@ -249,24 +249,23 @@ bool Position::isFixed(int number)
     return board[number] == number;
 }
 
-bool Position::yiIsFixed()
+bool Position::isAllFixed(Color c)
 {
-    for (int i = 0; i < 12; i += 2) {
-        if (!isFixed(i)) {
-            return false;
+    if (c == YI) {
+        for (int i = 0; i < 12; i += 2) {
+            if (!isFixed(i)) {
+                return false;
+            }
         }
-    }
-    return true;
-}
-
-bool Position::jiaIsFixed()
-{
-    for (int i = 1; i < 12; i += 2) {
-        if (!isFixed(i)) {
-            return false;
+        return true;
+    } else {
+        for (int i = 1; i < 12; i += 2) {
+            if (!isFixed(i)) {
+                return false;
+            }
         }
+        return true;
     }
-    return true;
 }
 
 bool Position::hasFixedPiece()
@@ -309,44 +308,19 @@ GameStatus Position::checkIfGameIsOver(GameStatus status)
     }
 
     if (bothLost()) {
-        result = GameResult::bothLost;
-        return GameStatus::resultBothLost;
+        result = GameResult::bothLose;
+        return GameStatus::resultBothLose;
     }
 
     // TODO: This paragraph is not concise and needs to be refactored
-    if (jiaIsFixed()) {
-        if (jiaHasWon == true) {
+    if (isAllFixed(sideToMove)) {
+        if (haveWon[sideToMove] == true) {
             // If Party A has already won but Party B failed to win, then only
             // Party A wins, it will not be a win-win situation
-            result = GameResult::jiaWin;
-            return GameStatus::resultJiaWin;
+            result = GameResult::win;
+            return GameStatus::resultWin;
         } else {
-            jiaHasWon = true;
-        }
-
-        if (sideToMove == JIA) {
-            // If A wins and A moves next, A must win alone, it will not be a
-            // win-win situation
-            result = GameResult::jiaWin;
-            return GameStatus::resultJiaWin;
-        }
-    }
-
-    if (yiIsFixed()) {
-        if (yiHasWon == true) {
-            // If Party B has already won but Party A failed to win, then only
-            // Party B wins, it will not be a win-win situation
-            result = GameResult::yiWin;
-            return GameStatus::resultYiWin;
-        } else {
-            yiHasWon = true;
-        }
-
-        if (sideToMove == YI) {
-            // If B wins and B moves next, B must win alone, it will not be a
-            // win-win situation
-            result = GameResult::yiWin;
-            return GameStatus::resultYiWin;
+            haveWon[sideToMove] = true;
         }
     }
 

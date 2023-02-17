@@ -50,16 +50,16 @@ Value Evaluation::value() const
     }
     
     switch (pos.result) {
-    case GameResult::bothLost:
+    case GameResult::bothLose:
         value = VALUE_BOTH_LOSE;
         break;
     case GameResult::bothWin:
         value = VALUE_BOTH_WIN;
         break;
-    case GameResult::jiaWin:
+    case GameResult::win:
         value = VALUE_WIN;
         break;
-    case GameResult::yiWin:
+    case GameResult::lose:
         value = VALUE_LOSE;
         break;
     case GameResult::none:
