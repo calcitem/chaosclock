@@ -39,20 +39,22 @@ bool Position::reset()
 
 void Position::initBoard()
 {
-    // 初始时手上无棋子
+    // Initially there are no chess pieces in hand
     inHand.clear();
 
-    // 清空历史
+    // clear history
     moveList.clear();
 
-    // 初始化棋子
+    // Initialize chess pieces
     for (int i = 0; i < 12; ++i) {
         board[i] = i;
     }
 
-    // 初始状态下不允许任何棋子处于“正位”。如果存在，
-    // 则需要重新随机分配直到没有棋子处于“正位”为止。
-    // 此处实现为，随机交换棋子位置，直到没有棋子处于正位。
+    // In the initial state, no chess piece is allowed to be in "upright
+    // position". if it exists, You need to re-allocate randomly until no chess
+    // piece is in the "right position". The implementation here is to randomly
+    // exchange the positions of the pieces until no pieces are in the upright
+    // position.
     std::mt19937 rng(std::random_device {}());
     std::uniform_int_distribution<> dist(0, 12 - 1);
     while (hasFixedPiece()) {
@@ -66,7 +68,7 @@ void Position::initBoard()
         6, 11, 8, 9, 5, 4, 1, 10, 7, 0, 2, 3,
     };
 
-    // 载入写死的用于测试的棋盘
+    // Load hard-coded board for testing
     for (int i = 0; i < 12; ++i) {
         board[i] = testBoard[i];
     }
@@ -95,16 +97,20 @@ PieceStatus Position::getStatus(int number)
 
 GameStatus Position::place(int number)
 {
-    // 任何一方吃掉的棋子，如果这个棋子的编号是奇数，就交到甲方的手上，
-    // 如果是偶数就交到乙方的手上。这些拿在手上的棋子将用于落子。
-    // 因此，落子之前需要先判断奇偶性，不能拿对方的子来落子。
+    // Any piece captured by any party, if the number of the piece is odd, it
+    // will be handed over to Party A, If it is an even number, it will be
+    // handed over to Party B. These chess pieces held in hand will be used for
+    // falling pieces. Therefore, you need to judge the parity before placing a
+    // piece, and you cannot use the opponent's piece to place a piece.
     if (number % 2 != sideToMove) {
         return GameStatus::errCannotPlaceOpponentsPiece;
     }
 
-    // 把手中的己方棋子落在它的正位上。
-    // 如果这个空位上有其它棋子，这个棋子就被吃掉了。
-    // 如果落子时吃掉了对方的棋子，则己方多一次行棋的机会，否则就换对方继续行棋
+    // Drop the own piece in the hand on its upright position.
+    // If there are other pieces in this space, the piece is captured.
+    // If the opponent's piece is captured when the piece is placed, the side
+    // will have one more chance to move, otherwise the opponent will continue
+    // to move
     int location = number;
     if (remove(location, number) == false) {
         changeSideToMove();
@@ -130,7 +136,7 @@ GameStatus Position::move(int location, int number)
 {
     int newLocation = (location + number) % 12;
 
-    // 处于“正位”的棋子，不能被吃掉。
+    // Pieces in the "upright" position cannot be captured.
     if (isFixed(newLocation)) {
         return GameStatus::errCannotRemoveFixedPiece;
     }
@@ -156,11 +162,12 @@ bool Position::remove(int location, int number)
     bool ret = false;
     int pc = board[location];
 
-    // 如果目标位置有子，即此次行棋确实是吃子，而不是放在空位上
+    // If there is a piece at the target position, that is, this move is indeed
+    // a capture piece, not placed on the empty space
     if (pc != -1) {
         inHand.push_back(pc);
 
-        // 如果吃掉的不是自己的棋子
+        // If it is not your own piece that is captured
         if (pc % 2 != sideToMove) {
             ret = true;
             ++st.pliesFromNull;
@@ -180,14 +187,16 @@ bool Position::remove(int location, int number)
 
 GameStatus Position::do_move(int number)
 {
-    // 验证棋子号码范围是否合法
+    // Verify that the chess piece number range is legal
     if (!isOk(number)) {
         return GameStatus::errorOutOfRange;
     }
 
-    // 何一方都可以主动放弃本回合的行棋，轮到对方行棋。
+    // Either side can voluntarily give up the move of this round, and it is the
+    // opponent's turn to move.
     if (number == -1) {
-        // 若甲乙双方接连放弃行棋，则判双方都输棋，即也是“双输”。
+        // If Party A and Party B give up playing chess one after another, both
+        // sides will be judged to lose, which is also a "lose-lose".
         if (lastMove == -1) {
             result = GameResult::bothLost;
             return GameStatus::resultBothLost;
@@ -198,17 +207,18 @@ GameStatus Position::do_move(int number)
         return GameStatus::ok;
     }
 
-    // 对方上一步刚走过的棋子，己方在这一步不能再重复拿来走。
+    // The chess piece that the opponent has just passed in the last step, the
+    // own side cannot repeat it in this step.
     if (number == lastMove) {
         return GameStatus::errCannotMoveLastMovedPiece;
     }
 
-    // 处于“正位”的棋子，不能再移动。
+    // Pieces in the "upright" position cannot be moved.
     if (isFixed(number)) {
         return GameStatus::errCannotMoveFixedPiece;
     }
 
-    // 找到要移动的棋子
+    // Find the piece to move
     for (int i = 0; i < 12; ++i) {
         if (board[i] == number) {
             return move(i, number);
@@ -229,8 +239,8 @@ void Position::undo_move(ChaosClock::Stack<Position>& ss)
 
 bool Position::isFixed(int number)
 {
-    // 编号为 n 的棋子被正好摆放到编号为 n 的空位的这种情况，
-    // 称之为编号为 n 的棋子处于“正位”。
+    // The situation where the chess piece numbered n is placed exactly in the
+    // empty space numbered n, Call the pawn number n in the "upright position".
     return board[number] == number;
 }
 
@@ -277,14 +287,16 @@ bool Position::bothWin()
 
 bool Position::bothLost()
 {
-    // TODO: 当前是判断 100
-    // 步还未结束棋局就算双输，是否有提前判断双方都不可能赢？
+    // TODO: The current judgment is 100
+    // If the game is not over yet, both sides will lose. Is it possible to
+    // judge in advance that neither side can win?
     return step > 100;
 }
 
 GameStatus Position::checkIfGameIsOver(GameStatus status)
 {
-    // TODO: 这段判断棋局结束的方式性能不佳，需优化
+    // TODO: The performance of this method of judging the end of the chess game
+    // is not good and needs to be optimized
 
     if (bothWin()) {
         result = GameResult::bothWin;
@@ -296,10 +308,11 @@ GameStatus Position::checkIfGameIsOver(GameStatus status)
         return GameStatus::resultBothLost;
     }
 
-    // TODO: 这段很不简洁，需要重构
+    // TODO: This paragraph is not concise and needs to be refactored
     if (jiaIsFixed()) {
         if (jiaHasWon == true) {
-            // 如果甲方早就赢了但乙方没能赢，那么就只有甲方赢，不会是双赢
+            // If Party A has already won but Party B failed to win, then only
+            // Party A wins, it will not be a win-win situation
             result = GameResult::jiaWin;
             return GameStatus::resultJiaWin;
         } else {
@@ -307,7 +320,8 @@ GameStatus Position::checkIfGameIsOver(GameStatus status)
         }
 
         if (sideToMove == JIA) {
-            // 如甲赢了且接下来还是甲走棋，甲肯定单独赢了，不会是双赢
+            // If A wins and A moves next, A must win alone, it will not be a
+            // win-win situation
             result = GameResult::jiaWin;
             return GameStatus::resultJiaWin;
         }
@@ -315,7 +329,8 @@ GameStatus Position::checkIfGameIsOver(GameStatus status)
 
     if (yiIsFixed()) {
         if (yiHasWon == true) {
-            // 如果乙方早就赢了但甲方没能赢，那么就只有乙方赢，不会是双赢
+            // If Party B has already won but Party A failed to win, then only
+            // Party B wins, it will not be a win-win situation
             result = GameResult::yiWin;
             return GameStatus::resultYiWin;
         } else {
@@ -323,7 +338,8 @@ GameStatus Position::checkIfGameIsOver(GameStatus status)
         }
 
         if (sideToMove == YI) {
-            // 如乙赢了且接下来还是乙走棋，乙肯定单独赢了，不会是双赢
+            // If B wins and B moves next, B must win alone, it will not be a
+            // win-win situation
             result = GameResult::yiWin;
             return GameStatus::resultYiWin;
         }
@@ -332,7 +348,7 @@ GameStatus Position::checkIfGameIsOver(GameStatus status)
     return status;
 }
 
-// 输出棋局状态信息
+// Output chess game status information
 void Position::showGameStatus(GameStatus status)
 {
     cout << "\n" << gameStatusStr[int(status)] << endl;
@@ -340,7 +356,8 @@ void Position::showGameStatus(GameStatus status)
 
 void Position::printClock()
 {
-    // 棋盘是圆形的，长得像钟表的，有从顺时针方向编号 1 到 12 共 12 个空位。
+    // The chessboard is circular, looks like a clock, and has 12 spaces
+    // numbered clockwise from 1 to 12.
     cout << "  " << setw(2) << setfill('0') << board[11] << " " << setw(2)
          << setfill('0') << board[0] << " " << setw(2) << setfill('0')
          << board[1] << " " << endl;
@@ -424,7 +441,7 @@ void Position::printSideToMove()
     }
 }
 
-// 输出当前棋局状态
+// Output the current game state
 void Position::print()
 {
     if (sideToMove == YI) {

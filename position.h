@@ -1,4 +1,4 @@
-﻿// This file is part of ChaosClock.
+// This file is part of ChaosClock.
 // Copyright (C) 2023 The ChaosClock developers (see AUTHORS file)
 //
 // ChaosClock is free software: you can redistribute it and/or modify
@@ -54,39 +54,40 @@ public:
     int pliesFromNull;
 };
 
-// 用于存储棋盘的当前状态。
-class Position {
+// Used to store the current state of the board.
+class Position
+{
 public:
-    // 时钟上 12 个点
-    int board[12] { -1 };
+    // 12 o'clock on the clock
+    int board[12] {-1};
 
-    // 在双方手上的棋子
+    // Pieces in both hands
     ChaosClock::Stack<int> inHand;
 
-    // 上次的着法
-    int lastMove { -2 };
+    // last move
+    int lastMove {-2};
 
-    // 双方走了多少步
-    int step { 0 };
+    // How many steps did the two sides take
+    int step {0};
 
     int gamePly {0};
 
-    // 当前该谁下棋
-    // (行棋顺序: 先由乙方先行棋，之后双方轮流行棋。)
-    Color sideToMove { YI };
+    // Who should play chess now
+    // (Order of moves: Party B moves first, and then both sides take turns.)
+    Color sideToMove {YI};
 
-    // 游戏结果
-    GameResult result { GameResult::none };
+    // game result
+    GameResult result {GameResult::none};
 
-    // 历史着法
+    // historical moves
     ChaosClock::Stack<int> moveList;
 
-    // 棋局状态
+    // game state
     StateInfo st;
 
-    // 是否有一方已经赢了
-    bool jiaHasWon { false };
-    bool yiHasWon { false };
+    // Whether one side has already won
+    bool jiaHasWon {false};
+    bool yiHasWon {false};
 
     Position()
     {
@@ -117,54 +118,58 @@ public:
         return *this;
     }
 
-    // 交换行棋方
+// exchange chess pieces
     void changeSideToMove();
 
-    // 判断编号为 n 的棋子是否处于 “正位”
+    // Judge whether the chess piece numbered n is in the "upright position"
     bool isFixed(int number);
 
-    // 判断是否存在棋子处于正位
+    // Determine whether there is a chess piece in the upright position
     bool hasFixedPiece();
 
-    // 乙方棋子全部放到“正位”
+    // Party B's chess pieces are all placed in the "right position"
     bool yiIsFixed();
 
-    // 甲方棋子全部放到“正位”
+    // Party A's chess pieces are all placed in the "right position"
     bool jiaIsFixed();
 
-    // 初始状态下，有编号为 1 到 12 的棋子随机地分配并摆放到棋盘上的 12 个空位上。
+    // In the initial state, chess pieces numbered 1 to 12 are randomly assigned
+    // and placed on 12 empty positions on the board.
     void initBoard();
 
     PieceStatus getStatus(int number);
 
-    // “落子” 是指，一方把手中的己方棋子落在它的正位上，
-    // 比如将编号为n的棋子放在编号为n的空位上。
-    // 如果这个空位上有其它棋子，也要把它吃掉。
+    // "Pull down" means that one side puts its own piece in its upright
+    // position, For example, put the chess piece numbered n on the empty space
+    // numbered n. If there is another piece in this space, eat it too.
     GameStatus place(int number);
 
-    // 验证棋子号码是否合法
+    // Verify that the chess piece number is legal
     bool isOk(int number);
 
-    // "走子" 是指，一方拿起棋盘上的任意一枚棋子，此棋子的编号是 n，则顺时针走 n 步，
-    // 若走 n 步后停留的空位有其它棋子，则要把它吃掉。
+    // "Moving piece" means that one side picks up any piece on the board, and
+    // the number of this piece is n, then walk n steps clockwise, If there are
+    // other chess pieces in the space left after n steps, eat them.
     GameStatus move(int location, int number);
 
-    // 使用 number 的己方棋子吃掉对方位于 location 的棋子, 如确实吃掉了对方子，返回 true
+    // Use number's own piece to capture the opponent's piece at location, and
+    // return true if the opponent's piece is indeed captured
     bool remove(int location, int number);
 
-    // 用于执行玩家的行棋操作，包括走子、落子、放弃。
+    // Used to execute the player's chess operations, including move, drop, and
+    // give up.
     GameStatus do_move(int number);
 
     void undo_move(ChaosClock::Stack<Position> &ss);
 
-    // 双方的棋子都在正位上，游戏结束
+    // The pieces of both sides are in the upright position, the game is over
     bool bothWin();
 
     bool bothLost();
 
     GameStatus checkIfGameIsOver(GameStatus status);
 
-    // 输出棋局状态信息
+    // Output chess game status information
     void showGameStatus(GameStatus status);
 
     void printClock();
@@ -177,7 +182,7 @@ public:
 
     void printSideToMove();
 
-    // 输出当前棋局状态
+    // Output the current game state
     void print();
 
     bool reset();
