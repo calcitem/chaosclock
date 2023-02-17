@@ -381,7 +381,7 @@ void Position::printClock()
 
 void Position::printPiecesOnBoard()
 {
-    cout << "On board: ";
+    //cout << "On board: ";
 
     for (int i = 0; i < 12; i++) {
         if (board[i] == i) {
@@ -391,12 +391,12 @@ void Position::printPiecesOnBoard()
         }
     }
 
-    cout << endl;
+    //cout << endl;
 }
 
 void Position::printPiecesInHand()
 {
-    cout << "In hand: ";
+    //cout << "In hand: ";
 
     for (int i = 0; i < inHand.size(); i++) {
         auto pc = inHand[i];
@@ -406,7 +406,7 @@ void Position::printPiecesInHand()
         } else if (pc > 0 && pc % 2 == 1) {
             cout << "(" << pc << ") ";
         } else if (pc >= 0 && pc % 2 == 0) {
-            cout << "[" << pc << "] ";
+            cout << "<" << pc << "> ";
         } else {
             cout << pc << "? ";
         }
@@ -417,13 +417,19 @@ void Position::printPiecesInHand()
 
 void Position::printMoveList()
 {
-    cout << "\nMove list: ";
-
-    for (int i = 0; i < moveList.size(); i++) {
-        cout << moveList[i] << " ";
-    }
+    //cout << "\nMove list: ";
 
     cout << endl;
+
+    int size = moveList.size();
+
+    for (int i = 0; i < size; i++) {
+        if (i == size - 1) {
+            cout << moveList[i] << endl;
+        } else {
+            cout << moveList[i] << ", ";
+        }
+    }
 }
 
 void Position::printSideToMove()
@@ -432,16 +438,10 @@ void Position::printSideToMove()
          << endl;
 
     if (sideToMove == JIA) {
-        cout << "******  ******" << endl;
-        cout << "******  *    *" << endl;
-        cout << "******  *    *" << endl;
-        cout << "******  ******" << endl;
+        cout << "Player A";
         cout << endl;
     } else {
-        cout << "******  ******" << endl;
-        cout << "*    *  ******" << endl;
-        cout << "*    *  ******" << endl;
-        cout << "******  ******" << endl;
+        cout << "Player B";
         cout << endl;
     }
 }
@@ -455,6 +455,7 @@ void Position::print()
 
     printClock();
     printPiecesOnBoard();
+    cout << ": ";
     printPiecesInHand();
     printMoveList();
     printSideToMove();
