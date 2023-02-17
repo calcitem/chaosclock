@@ -86,7 +86,7 @@ Move engineToGo(const Position &pos)
     start_thinking(&pos);
 
     cout << "\033[33m";    
-    cout << "AI: " << (int)bestMove;
+    cout << "AI: " << (int)bestMove << "\tValue: " << (int)bestvalue;
     cout << "\033[0m";
 
     return bestMove;

@@ -25,6 +25,7 @@
 using std::vector;
 
 extern Move bestMove;
+extern Value bestvalue;
 
 int start_thinking(const Position *pos);
 

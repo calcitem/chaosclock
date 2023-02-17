@@ -104,15 +104,19 @@ Value qsearch(Position *pos, Depth depth,
         }
     }
 
+    // TODO: Recover || depth <= 0 
     if (pos->result != GameResult::none /* || depth <= 0 */) {
         bestValue = Eval::evaluate(*pos);
 
         // For win quickly
+        // TODO: Apply
+#if 0
         if (bestValue > 0) {
             bestValue += depth;
         } else {
             bestValue -= depth;
         }
+#endif
 
         return bestValue;
     }
