@@ -24,9 +24,8 @@
 
 using std::vector;
 
-extern Move bestMove;
 extern Value bestvalue;
 
-int start_thinking(const Position *pos);
+Move start_thinking(const Position *pos);
 
 #endif // #ifndef SEARCH_H_INCLUDED

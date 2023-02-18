@@ -83,13 +83,13 @@ begin:
 Move engineToGo(const Position &pos)
 {
     cout << "Thinking...\n";
-    start_thinking(&pos);
+    Move best = start_thinking(&pos);
 
     cout << "\033[33m";    
-    cout << "AI: " << (int)bestMove << "\tValue: " << (int)bestvalue;
+    cout << "AI: " << (int)best << "\tValue: " << (int)bestvalue;
     cout << "\033[0m";
 
-    return bestMove;
+    return best;
 }
 
 // In the main function, use a loop to continuously execute the player's move

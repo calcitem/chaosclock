@@ -64,8 +64,11 @@ public:
     // Pieces in both hands
     ChaosClock::Stack<int> inHand;
 
-    // last move
+    // Last move
     int lastMove {-2};
+
+    // Best move
+    Move bestMove {MOVE_NONE};
 
     // How many steps did the two sides take
     int step {0};

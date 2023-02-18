@@ -25,7 +25,6 @@ using Eval::evaluate;
 Position rootPos;
 
 Depth originDepth {SEARCH_DEPTH};
-Move bestMove {MOVE_NONE};
 Value bestvalue {VALUE_ZERO};
 Value lastvalue {VALUE_ZERO};
 
@@ -70,10 +69,8 @@ ChaosClock::Stack<Position> ss;
 /// repeatedly with increasing depth until the allocated thinking time has been
 /// consumed, the user stops the search, or the maximum search depth is reached.
 
-int start_thinking(const Position *pos)
+Move start_thinking(const Position *pos)
 {
-
-
     //rootPos = pos;
     std::memcpy(&rootPos, pos, sizeof(Position));
 
@@ -94,7 +91,7 @@ int start_thinking(const Position *pos)
 
     ss.clear();
 
-    return 0;
+    return rootPos.bestMove;
 }
 
 Value qsearch(Position *pos, Depth depth,
@@ -134,7 +131,7 @@ Value qsearch(Position *pos, Depth depth,
     const int moveCount = mp.move_count();
 
     if (moveCount == 1 && depth == SEARCH_DEPTH) {
-        bestMove = nextMove;
+        pos->bestMove = nextMove;
         bestValue = VALUE_UNIQUE;
         return bestValue;
     }
@@ -172,7 +169,7 @@ Value qsearch(Position *pos, Depth depth,
 
             if (value > alpha) {
                 if (depth == originDepth) {
-                    bestMove = move;
+                    pos->bestMove = move;
                 }
 
                 if (value < beta) {
@@ -210,7 +207,7 @@ Value minimax(Position *pos, Depth depth)
     const int moveCount = mp.move_count();
 
     if (moveCount == 1 && depth == SEARCH_DEPTH) {
-        bestMove = nextMove;
+        pos->bestMove = nextMove;
         bestValue = VALUE_UNIQUE;
         return bestValue;
     }
@@ -250,7 +247,7 @@ Value minimax(Position *pos, Depth depth)
 
         if (value > bestValue) {
             bestValue = value;
-            bestMove = move;
+            pos->bestMove = move;
         }
 
         if (depth == SEARCH_DEPTH) {
