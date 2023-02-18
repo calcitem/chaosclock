@@ -23,10 +23,10 @@
 
 #define TEST_MODE
 
-#define MINIMAX_ALGORITHM
+//#define MINIMAX_ALGORITHM
 
-#define SEARCH_DEPTH    6
+#define SEARCH_DEPTH    14
 
-#define BOTH_LOSE_THRESHOLD 100
+#define BOTH_LOSE_THRESHOLD 14
 
 #endif // INCLUDE_CONFIG_H_

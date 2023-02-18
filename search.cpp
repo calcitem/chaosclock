@@ -109,7 +109,7 @@ Value qsearch(Position *pos, Depth depth,
     }
 
     // TODO: Recover || depth <= 0 
-    if (pos->result != GameResult::none /* || depth <= 0 */) {
+    if (pos->result != GameResult::none || depth <= 0) {
         bestValue = Eval::evaluate(*pos);
 
         // For win quickly
@@ -137,9 +137,14 @@ Value qsearch(Position *pos, Depth depth,
         return bestValue;
     }
 
+    if (depth == SEARCH_DEPTH) {
+        cout << "\nMove count = " << moveCount << endl;
+    }
+
     // Loop through the moves until no moves remain or a beta cutoff occurs
     for (int i = 0; i < moveCount; i++) {
-        ss.push(*pos);
+        //ss.push(*pos);
+        Position backupPosition = *pos;
         const Color before = pos->sideToMove;
         const Move move = mp.moves[i].move;
 
@@ -171,7 +176,8 @@ Value qsearch(Position *pos, Depth depth,
             value = VALUE_BOTH_LOSE;
         }
 
-        pos->undo_move();
+        //pos->undo_move();
+        *pos = backupPosition;
 
         if (value >= bestValue) {
             bestValue = value;
@@ -189,6 +195,16 @@ Value qsearch(Position *pos, Depth depth,
                     break;                 // Fail high
                 }
             }
+        }
+
+        if (depth == SEARCH_DEPTH) {
+            cout << "Move: " << (int)move << ",  Value = " << (int)value;
+
+            if (value == bestvalue) {
+                cout << " *";
+            }
+
+            cout << endl;
         }
     }
 
@@ -254,6 +270,14 @@ Value minimax(Position *pos, Depth depth)
             value = -minimax(pos, depth - 1);
         } else {
             value = minimax(pos, depth - 1);
+        }
+
+        if (value == -VALUE_BOTH_WIN) {
+            value = VALUE_BOTH_WIN;
+        }
+
+        if (value == -VALUE_BOTH_LOSE) {
+            value = VALUE_BOTH_LOSE;
         }
 
         //pos->undo_move();
