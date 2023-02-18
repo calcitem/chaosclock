@@ -29,6 +29,8 @@ Move bestMove {MOVE_NONE};
 Value bestvalue {VALUE_ZERO};
 Value lastvalue {VALUE_ZERO};
 
+Value minimax(Position *pos, Depth depth);
+
 Value qsearch(Position *pos, Depth depth,
               Value alpha, Value beta);
 
@@ -78,10 +80,14 @@ int start_thinking(const Position *pos)
     Value value = VALUE_ZERO;
     const Depth d = SEARCH_DEPTH;
 
+#ifdef MINIMAX_ALGORITHM
+    value = minimax(&rootPos, d);
+#else
     Value alpha = VALUE_NONE;
     Value beta = VALUE_NONE;
 
     value = qsearch(&rootPos, d, alpha, beta);
+#endif // MINIMAX_ALGORITHM
 
     lastvalue = bestvalue;
     bestvalue = value;
@@ -176,6 +182,74 @@ Value qsearch(Position *pos, Depth depth,
                     assert(value >= beta); // Fail high
                     break;                 // Fail high
                 }
+            }
+        }
+    }
+
+    return bestValue;
+}
+
+Value minimax(Position *pos, Depth depth)
+{
+    Value value;
+    Value bestValue = -VALUE_INFINITE;
+
+    if (pos->st.rule50 > BOTH_LOSE_THRESHOLD) {
+        return VALUE_BOTH_LOSE;
+    }
+
+    if (pos->result != GameResult::none || depth <= 0) {
+        bestValue = Eval::evaluate(*pos);
+        return bestValue;
+    }
+
+    // Initialize a MovePicker object for the current position, and prepare
+    // to search the moves.
+    MovePicker mp(*pos);
+    const Move nextMove = mp.next_move();
+    const int moveCount = mp.move_count();
+
+    if (moveCount == 1 && depth == SEARCH_DEPTH) {
+        bestMove = nextMove;
+        bestValue = VALUE_UNIQUE;
+        return bestValue;
+    }
+
+    // Loop through the moves and recursively evaluate the position after each
+    // move.
+    for (int i = 0; i < moveCount; i++) {
+        ss.push(*pos);
+        const Color before = pos->sideToMove;
+        const Move move = mp.moves[i].move;
+
+        // Make and evaluate the move
+        switch (pos->do_move(move)) {
+        case GameStatus::errorOutOfRange:
+        case GameStatus::errCannotMoveLastMovedPiece:
+        case GameStatus::errCannotPlaceOpponentsPiece:
+        case GameStatus::errCannotMoveFixedPiece:
+        case GameStatus::errCannotRemoveFixedPiece:
+            continue;
+        default:
+            break;
+        }
+
+        const Color after = pos->sideToMove;
+
+        if (after != before) {
+            value = -minimax(pos, depth - 1);
+        } else {
+            value = minimax(pos, depth - 1);
+        }
+
+        pos->undo_move();
+
+        if (value >= bestValue) {
+            bestValue = value;
+
+            if (depth == SEARCH_DEPTH && value > bestvalue) {
+                bestvalue = value;
+                bestMove = move;
             }
         }
     }

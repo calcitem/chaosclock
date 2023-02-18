@@ -23,6 +23,8 @@
 
 #define TEST_MODE
 
+#define MINIMAX_ALGORITHM
+
 #define SEARCH_DEPTH    32
 
 #define BOTH_LOSE_THRESHOLD 7
