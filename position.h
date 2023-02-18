@@ -102,7 +102,7 @@ public:
 
     Position &operator=(const Position &other)
     {
-        memcpy(this->board, other.board, 12);
+        memcpy(this->board, other.board, sizeof(this->board));
         this->inHand = other.inHand;
         this->lastMove = other.lastMove;
         this->step = other.step;
