@@ -218,7 +218,7 @@ Value minimax(Position *pos, Depth depth)
     // Loop through the moves and recursively evaluate the position after each
     // move.
     if (depth == SEARCH_DEPTH) {
-        cout << "Move cout = " << moveCount << endl << endl;
+        cout << "\nMove count = " << moveCount << endl;
     }
 
     for (int i = 0; i < moveCount; i++) {
@@ -254,8 +254,7 @@ Value minimax(Position *pos, Depth depth)
         }
 
         if (depth == SEARCH_DEPTH) {
-            cout << "Move: " << i << ",  "
-                 << "Value: " << (int)value;
+            cout << "Move: " << (int)move << ",  Value = " << (int)value;
 
             if (value == bestvalue) {
                 cout <<  " *";
