@@ -46,7 +46,7 @@ Value Evaluation::value() const
     Value value = VALUE_ZERO;
 
     if (pos.has_repeat()) {
-        return VALUE_REPEAT;
+        return VALUE_DRAW;
     }
     
     switch (pos.result) {

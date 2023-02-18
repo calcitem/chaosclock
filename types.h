@@ -62,12 +62,12 @@ enum Value : int8_t {
     VALUE_ZERO = 0,
     VALUE_INFINITE = INT8_MAX,
     VALUE_NONE = -VALUE_INFINITE,
-    VALUE_REPEAT = -1,
-    VALUE_LOSE = 0,
-    VALUE_BOTH_LOSE =30,
-    VALUE_BOTH_WIN = 60,
-    VALUE_UNIQUE = 100,
-    VALUE_WIN = 120,
+    VALUE_DRAW = -1,
+    VALUE_LOSE = -100,
+    VALUE_BOTH_LOSE = 0,
+    VALUE_BOTH_WIN = 0,
+    VALUE_UNIQUE = 80,
+    VALUE_WIN = 100,
 };
 
 enum Rating : int8_t {
