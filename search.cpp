@@ -25,6 +25,7 @@ using Eval::evaluate;
 Position rootPos;
 
 Depth originDepth {SEARCH_DEPTH};
+Move bestMove {MOVE_NONE};
 Value bestvalue {VALUE_ZERO};
 Value lastvalue {VALUE_ZERO};
 
@@ -91,7 +92,7 @@ Move start_thinking(const Position *pos)
 
     ss.clear();
 
-    return rootPos.bestMove;
+    return bestMove;
 }
 
 Value qsearch(Position *pos, Depth depth,
@@ -131,7 +132,7 @@ Value qsearch(Position *pos, Depth depth,
     const int moveCount = mp.move_count();
 
     if (moveCount == 1 && depth == SEARCH_DEPTH) {
-        pos->bestMove = nextMove;
+        bestMove = nextMove;
         bestValue = VALUE_UNIQUE;
         return bestValue;
     }
@@ -173,7 +174,7 @@ Value qsearch(Position *pos, Depth depth,
 
             if (value > alpha) {
                 if (depth == originDepth) {
-                    pos->bestMove = move;
+                    bestMove = move;
                 }
 
                 if (value < beta) {
@@ -213,7 +214,7 @@ Value minimax(Position *pos, Depth depth)
     const int moveCount = mp.move_count();
 
     if (moveCount == 1 && depth == SEARCH_DEPTH) {
-        pos->bestMove = nextMove;
+        bestMove = nextMove;
         bestValue = VALUE_UNIQUE;
         return bestValue;
     }
@@ -256,7 +257,9 @@ Value minimax(Position *pos, Depth depth)
 
         if (value > bestValue) {
             bestValue = value;
-            pos->bestMove = move;
+            if (depth == SEARCH_DEPTH) {
+                bestMove = move;
+            }
         }
 
         if (depth == SEARCH_DEPTH) {

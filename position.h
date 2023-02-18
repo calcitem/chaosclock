@@ -67,9 +67,6 @@ public:
     // Last move
     int lastMove {-2};
 
-    // Best move
-    Move bestMove {MOVE_NONE};
-
     // How many steps did the two sides take
     int step {0};
 
