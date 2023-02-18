@@ -217,6 +217,10 @@ Value minimax(Position *pos, Depth depth)
 
     // Loop through the moves and recursively evaluate the position after each
     // move.
+    if (depth == SEARCH_DEPTH) {
+        cout << "Move cout = " << moveCount << endl << endl;
+    }
+
     for (int i = 0; i < moveCount; i++) {
         ss.push(*pos);
         const Color before = pos->sideToMove;
@@ -247,6 +251,17 @@ Value minimax(Position *pos, Depth depth)
         if (value > bestValue) {
             bestValue = value;
             bestMove = move;
+        }
+
+        if (depth == SEARCH_DEPTH) {
+            cout << "Move: " << i << ",  "
+                 << "Value: " << (int)value;
+
+            if (value == bestvalue) {
+                cout <<  " *";
+            }
+
+            cout << endl;
         }
     }
 
