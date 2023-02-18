@@ -162,6 +162,10 @@ Value qsearch(Position *pos, Depth depth,
             value = qsearch(pos, depth - 1, alpha, beta);
         }
 
+        if (value == -VALUE_BOTH_WIN) {
+            value = VALUE_BOTH_WIN;
+        }
+
         pos->undo_move();
 
         if (value >= bestValue) {
