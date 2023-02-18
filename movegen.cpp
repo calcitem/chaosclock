@@ -23,9 +23,17 @@ ExtMove *generate(Position &pos, ExtMove *moveList)
 
     // TODO: performance
 
+    int pc = NO_PIECE;
+
     for (int i = 0; i < 12; i++) {
-        if (pos.board[i] != -1 && i != pos.board[i]) {
-            *cur++ = (Move)(pos.board[i]);
+        pc = pos.board[i];
+
+        if (pc > 0 && pc != i && pc != pos.lastMove) {
+            int newLocation = (i + pc) % 12;
+
+            if (!pos.isFixed(newLocation)) {
+                *cur++ = (Move)pc;
+            }
         }
     }
 
