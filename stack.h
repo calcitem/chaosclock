@@ -39,7 +39,7 @@ public:
 
     Stack &operator=(const Stack &other)
     {
-        memcpy(arr, other.arr, length());
+        memcpy(arr, other.arr, sizeof(arr));
         p = other.p;
         return *this;
     }
