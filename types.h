@@ -64,7 +64,7 @@ enum Value : int8_t {
     VALUE_NONE = -VALUE_INFINITE,
     VALUE_DRAW = -1,
     VALUE_LOSE = -100,
-    VALUE_BOTH_LOSE = 0,
+    VALUE_BOTH_LOSE = -50,
     VALUE_BOTH_WIN = 50,
     VALUE_UNIQUE = 80,
     VALUE_WIN = 100,

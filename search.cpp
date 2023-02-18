@@ -167,6 +167,10 @@ Value qsearch(Position *pos, Depth depth,
             value = VALUE_BOTH_WIN;
         }
 
+        if (value == -VALUE_BOTH_LOSE) {
+            value = VALUE_BOTH_LOSE;
+        }
+
         pos->undo_move();
 
         if (value >= bestValue) {

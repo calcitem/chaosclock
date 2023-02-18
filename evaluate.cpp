@@ -64,7 +64,7 @@ Value Evaluation::value() const
         break;
     case GameResult::none:
         // TODO: Implement it
-        value = VALUE_LOSE;
+        value = VALUE_ZERO;
         break;
     }
 
