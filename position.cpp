@@ -238,7 +238,22 @@ GameStatus Position::do_move(int number)
 
 void Position::undo_move()
 {
-    std::memcpy(this, ss.top(), sizeof(Position));
+    // Why it doesn't work?
+    //std::memcpy(this, ss.top(), sizeof(Position));
+
+    const Position *other = ss.top();
+
+    memcpy(this->board, other->board, sizeof(this->board));
+    this->inHand = other->inHand;
+    this->lastMove = other->lastMove;
+    this->step = other->step;
+    this->gamePly = other->gamePly;
+    this->sideToMove = other->sideToMove;
+    this->result = other->result;
+    this->moveList = other->moveList;
+    this->st = other->st;
+    memcpy(this->haveWon, other->haveWon, sizeof(haveWon));
+
     ss.pop();
 }
 

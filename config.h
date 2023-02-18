@@ -25,8 +25,8 @@
 
 #define MINIMAX_ALGORITHM
 
-#define SEARCH_DEPTH    32
+#define SEARCH_DEPTH    6
 
-#define BOTH_LOSE_THRESHOLD 7
+#define BOTH_LOSE_THRESHOLD 100
 
 #endif // INCLUDE_CONFIG_H_

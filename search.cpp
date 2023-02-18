@@ -195,6 +195,8 @@ Value minimax(Position *pos, Depth depth)
     Value value;
     Value bestValue = -VALUE_INFINITE;
 
+    //cout << "depth = " << (int)depth <<  endl;
+
     if (pos->st.rule50 > BOTH_LOSE_THRESHOLD) {
         return VALUE_BOTH_LOSE;
     }
@@ -223,7 +225,9 @@ Value minimax(Position *pos, Depth depth)
     }
 
     for (int i = 0; i < moveCount; i++) {
-        ss.push(*pos);
+        //ss.push(*pos);
+        Position backupPosition = *pos;
+
         const Color before = pos->sideToMove;
         const Move move = mp.moves[i].move;
 
@@ -247,7 +251,8 @@ Value minimax(Position *pos, Depth depth)
             value = minimax(pos, depth - 1);
         }
 
-        pos->undo_move();
+        //pos->undo_move();
+        *pos = backupPosition;
 
         if (value > bestValue) {
             bestValue = value;
