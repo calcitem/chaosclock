@@ -244,13 +244,9 @@ Value minimax(Position *pos, Depth depth)
 
         pos->undo_move();
 
-        if (value >= bestValue) {
+        if (value > bestValue) {
             bestValue = value;
-
-            if (depth == SEARCH_DEPTH && value > bestvalue) {
-                bestvalue = value;
-                bestMove = move;
-            }
+            bestMove = move;
         }
     }
 
