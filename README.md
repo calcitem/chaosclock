@@ -124,3 +124,7 @@ move_available = {
 ## Windows
 
 使用 Visual C++ 打开 sln 文件编译。
+
+# 运行方法
+
+先配置 `chaosclock.cfg`，再运行。

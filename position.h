@@ -186,6 +186,8 @@ public:
 
     void printMoveList();
 
+    void printLastMove();
+
     void printSideToMove();
 
     // Output the current game state

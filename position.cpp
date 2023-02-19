@@ -39,6 +39,8 @@ bool Position::reset()
     return true;
 }
 
+int init_board[12];
+
 void Position::initBoard()
 {
     // Initially there are no chess pieces in hand
@@ -47,6 +49,7 @@ void Position::initBoard()
     // clear history
     moveList.clear();
 
+#ifdef RANDOM_POSITION
     // Initialize chess pieces
     for (int i = 0; i < 12; ++i) {
         board[i] = i;
@@ -64,17 +67,27 @@ void Position::initBoard()
         int j = dist(rng);
         std::swap(board[i], board[j]);
     }
-
-#ifdef TEST_MODE
-    int testBoard[] = {
-        6, 11, 8, 9, 5, 4, 1, 10, 7, 0, 2, 3,
-    };
-
+#else
     // Load hard-coded board for testing
     for (int i = 0; i < 12; ++i) {
-        board[i] = testBoard[i];
+        board[i] = init_board[i];
     }
-#endif // TEST_MODE
+
+    bool found = false;
+
+    for (int i = 0; i < 12; ++i) {
+        found = false;
+        for (int j = 0; j < 12; ++j) {
+            if (board[j] == i)
+            {
+                found = true;
+            }
+        }
+        if (found == false) {
+            inHand.push_back(i);
+        }
+    }
+#endif // RANDOM_POSITION
 }
 
 void Position::changeSideToMove()
@@ -406,9 +419,7 @@ void Position::printPiecesInHand()
 
 void Position::printMoveList()
 {
-    //cout << "\nMove list: ";
-
-    cout << endl;
+    cout << "\nMove list: ";
 
     int size = moveList.size();
 
@@ -419,6 +430,12 @@ void Position::printMoveList()
             cout << moveList[i] << ", ";
         }
     }
+}
+
+void Position::printLastMove()
+{
+    cout << endl;    
+    cout << "Last move: " << lastMove << endl;
 }
 
 void Position::printSideToMove()
@@ -446,6 +463,7 @@ void Position::print()
     printPiecesOnBoard();
     cout << ": ";
     printPiecesInHand();
+    printLastMove();
     printMoveList();
     printSideToMove();
 

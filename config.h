@@ -21,11 +21,7 @@
 #pragma execution_character_set("utf-8")
 #endif
 
-#define TEST_MODE
-
-//#define MINIMAX_ALGORITHM
-
-#define SEARCH_DEPTH    14
+//#define RANDOM_POSITION
 
 #define BOTH_LOSE_THRESHOLD 14
 

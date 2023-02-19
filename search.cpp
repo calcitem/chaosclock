@@ -24,7 +24,7 @@ using Eval::evaluate;
 
 Position rootPos;
 
-Depth originDepth {SEARCH_DEPTH};
+Depth originDepth {12};
 Move bestMove {MOVE_NONE};
 Value bestvalue {VALUE_ZERO};
 Value lastvalue {VALUE_ZERO};
@@ -65,6 +65,7 @@ begin:
 }
 
 ChaosClock::Stack<Position> ss;
+int algorithm;
 
 /// start_thinking() is the main iterative deepening loop. It calls search()
 /// repeatedly with increasing depth until the allocated thinking time has been
@@ -72,20 +73,22 @@ ChaosClock::Stack<Position> ss;
 
 Move start_thinking(const Position *pos)
 {
-    //rootPos = pos;
+    // rootPos = pos;
     std::memcpy(&rootPos, pos, sizeof(Position));
 
     Value value = VALUE_ZERO;
-    const Depth d = SEARCH_DEPTH;
+    const Depth d = originDepth;
 
-#ifdef MINIMAX_ALGORITHM
-    value = minimax(&rootPos, d);
-#else
-    Value alpha = VALUE_NONE;
-    Value beta = VALUE_NONE;
+    if (algorithm == 1) {
+        value = minimax(&rootPos, d);
+    } else if (algorithm == 2) {
+        Value alpha = VALUE_NONE;
+        Value beta = VALUE_NONE;
 
-    value = qsearch(&rootPos, d, alpha, beta);
-#endif // MINIMAX_ALGORITHM
+        value = qsearch(&rootPos, d, alpha, beta);
+    } else {
+        assert(0);
+    }
 
     lastvalue = bestvalue;
     bestvalue = value;
@@ -131,13 +134,13 @@ Value qsearch(Position *pos, Depth depth,
     const Move nextMove = mp.next_move();
     const int moveCount = mp.move_count();
 
-    if (moveCount == 1 && depth == SEARCH_DEPTH) {
+    if (moveCount == 1 && depth == originDepth) {
         bestMove = nextMove;
         bestValue = VALUE_UNIQUE;
         return bestValue;
     }
 
-    if (depth == SEARCH_DEPTH) {
+    if (depth == originDepth) {
         cout << "\nMove count = " << moveCount << endl;
     }
 
@@ -197,7 +200,7 @@ Value qsearch(Position *pos, Depth depth,
             }
         }
 
-        if (depth == SEARCH_DEPTH) {
+        if (depth == originDepth) {
             cout << "Move: " << (int)move << ",  Value = " << (int)value;
 
             if (value == bestvalue) {
@@ -233,7 +236,7 @@ Value minimax(Position *pos, Depth depth)
     const Move nextMove = mp.next_move();
     const int moveCount = mp.move_count();
 
-    if (moveCount == 1 && depth == SEARCH_DEPTH) {
+    if (moveCount == 1 && depth == originDepth) {
         bestMove = nextMove;
         bestValue = VALUE_UNIQUE;
         return bestValue;
@@ -241,7 +244,7 @@ Value minimax(Position *pos, Depth depth)
 
     // Loop through the moves and recursively evaluate the position after each
     // move.
-    if (depth == SEARCH_DEPTH) {
+    if (depth == originDepth) {
         cout << "\nMove count = " << moveCount << endl;
     }
 
@@ -285,12 +288,12 @@ Value minimax(Position *pos, Depth depth)
 
         if (value > bestValue) {
             bestValue = value;
-            if (depth == SEARCH_DEPTH) {
+            if (depth == originDepth) {
                 bestMove = move;
             }
         }
 
-        if (depth == SEARCH_DEPTH) {
+        if (depth == originDepth) {
             cout << "Move: " << (int)move << ",  Value = " << (int)value;
 
             if (value == bestvalue) {

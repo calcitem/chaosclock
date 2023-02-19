@@ -42,6 +42,8 @@
 #include <vector>
 #include <string>
 #include <algorithm>
+#include <fstream>
+#include <vector>
 
 #include "types.h"
 #include "position.h"
@@ -49,9 +51,86 @@
 
 using namespace std;
 
-const bool isAi[] = {
+extern Depth originDepth;
+extern int algorithm;
+extern int init_board[12];
+static int last_move;
+
+static string player_one_str, player_two_str, algorithm_str, board_str;
+static int side_to_move, depth, player_one, player_two;
+
+static bool isAi[] = {
     false, true
 };
+
+int readConfig()
+{
+    ifstream cfg_file("chaosclock.cfg");
+
+    string line;
+    while (getline(cfg_file, line)) {
+        if (line.empty() || line[0] == '#') {
+            continue;
+        }
+
+        string variable, value;
+        size_t equals_pos = line.find('=');
+        if (equals_pos != string::npos) {
+            variable = line.substr(0, equals_pos);
+            value = line.substr(equals_pos + 1);
+            value.erase(0, value.find_first_not_of(" \t\n\r\f\v"));
+            value.erase(value.find_last_not_of(" \t\n\r\f\v") + 1);
+        }
+
+        if (variable == "player-one") {
+            player_one_str = value;
+            player_one = (player_one_str == "ai") ? 1 : 2;
+        } else if (variable == "player-two") {
+            player_two_str = value;
+            player_two = (player_two_str == "ai") ? 1 : 2;
+        } else if (variable == "side-to-move") {
+            side_to_move = stoi(value);
+        } else if (variable == "depth") {
+            depth = stoi(value);
+        } else if (variable == "algorithm") {
+            algorithm_str = value;
+            algorithm = (algorithm_str == "minimax") ? 1 : 2;
+        } else if (variable == "board") {
+            board_str = value;  
+            vector<string> tokens;
+            size_t pos = 0;
+            while ((pos = board_str.find(",")) != string::npos) {
+                string token = board_str.substr(0, pos);
+                tokens.push_back(token);
+                board_str.erase(0, pos + 1);
+            }
+            tokens.push_back(board_str);
+
+            for (int i = 0; i < tokens.size(); i++) {
+                init_board[i] = stoi(tokens[i]);
+            }
+        } else if (variable == "last-move") {
+            last_move = stoi(value);
+        }
+    }
+
+    cout << "player-one: " << player_one_str << ", player_one: " << player_one << endl;
+    cout << "player-two: " << player_two_str << ", player_two: " << player_two << endl;
+    cout << "side-to-move: " << side_to_move << endl;
+    cout << "depth: " << depth << endl;
+    cout << "algorithm_str: " << algorithm_str << ", algorithm: " << algorithm << endl;
+    cout << "init_board: ";
+    for (int i = 0; i < 12; i++) {
+        cout << init_board[i] << " ";
+    }
+
+    cout << "\n----------------------------------------------------------";
+    cout << endl;
+
+   cfg_file.close();
+
+    return 0;
+}
 
 Move humanToGo() {
     int number;
@@ -99,7 +178,6 @@ int main()
 {
     Move move = MOVE_NONE;
     Position position;
-    position.initBoard();
     Position pos;
 
     cout << "  _____ _                        _____ _            _    " << endl;
@@ -114,6 +192,32 @@ int main()
          << endl
          << endl
          << endl;
+
+    readConfig();
+
+    position.initBoard();
+
+    if (player_one == 1) {
+        isAi[0] = true;
+    } else {
+        isAi[0] = false;
+    }
+
+    if (player_two == 1) {
+        isAi[1] = true;
+    } else {
+        isAi[1] = false;
+    }
+
+    if (side_to_move == 1) {
+        pos.sideToMove = WHITE;
+    } else {
+        pos.sideToMove = BLACK;
+    }
+
+    originDepth = (Depth)depth;
+
+    pos.lastMove = last_move;
 
     position.print();
     position.step = 0;
