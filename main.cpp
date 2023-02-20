@@ -174,7 +174,11 @@ Move engineToGo(const Position &pos)
 // In the main function, use a loop to continuously execute the player's move
 // operation until the game ends. If the player's input is invalid, give an
 // error message.
+#ifdef BRUTE_FORCE_ALGORITHM
+int tmain()
+#else
 int main()
+#endif
 {
     Move move = MOVE_NONE;
     Position position;

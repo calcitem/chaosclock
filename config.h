@@ -21,6 +21,8 @@
 #pragma execution_character_set("utf-8")
 #endif
 
+//#define BRUTE_FORCE_ALGORITHM
+
 //#define RANDOM_POSITION
 
 #define BOTH_LOSE_THRESHOLD 14

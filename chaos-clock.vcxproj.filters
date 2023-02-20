@@ -36,6 +36,9 @@
     <ClCompile Include="misc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="chaosclock.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="position.h">
