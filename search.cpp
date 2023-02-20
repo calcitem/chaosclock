@@ -145,17 +145,9 @@ Value qsearch(Position *pos, Depth depth,
         const Color before = pos->sideToMove;
         const Move move = mp.moves[i].move;
 
-        // Make and search the move
-        switch (pos->do_move(move)) {
-        case GameStatus::errorOutOfRange:
-        case GameStatus::errCannotMoveLastMovedPiece:
-        case GameStatus::errCannotPlaceOpponentsPiece:
-        case GameStatus::errCannotMoveFixedPiece:
-        case GameStatus::errCannotRemoveFixedPiece:
-            continue;
-        default:
-            break;
-        }
+        // Make and evaluate the move
+        GameStatus status = pos->do_move(move);
+        status = pos->checkIfGameIsOver(status);
 
         const Color after = pos->sideToMove;
 
@@ -244,16 +236,8 @@ Value minimax(Position *pos, Depth depth)
         const Move move = mp.moves[i].move;
 
         // Make and evaluate the move
-        switch (pos->do_move(move)) {
-        case GameStatus::errorOutOfRange:
-        case GameStatus::errCannotMoveLastMovedPiece:
-        case GameStatus::errCannotPlaceOpponentsPiece:
-        case GameStatus::errCannotMoveFixedPiece:
-        case GameStatus::errCannotRemoveFixedPiece:
-            continue;
-        default:
-            break;
-        }
+        GameStatus status = pos->do_move(move);
+        status = pos->checkIfGameIsOver(status);
 
         const Color after = pos->sideToMove;
 
