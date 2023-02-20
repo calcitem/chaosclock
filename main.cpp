@@ -57,7 +57,7 @@ extern int init_board[12];
 static int last_move;
 
 static string player_even_str, player_odd_str, algorithm_str, board_str;
-static int side_to_move, depth, player_even, player_odd;
+static int side_to_move, depth, player_even, player_odd, even_has_won, odd_has_won;
 
 static bool isAi[] = {
     false, true
@@ -92,6 +92,10 @@ int readConfig()
             side_to_move = stoi(value);
         } else if (variable == "depth") {
             depth = stoi(value);
+        } else if (variable == "even-has-won") {
+            even_has_won = stoi(value);
+        } else if (variable == "odd-has-won") {
+            odd_has_won = stoi(value);
         } else if (variable == "algorithm") {
             algorithm_str = value;
             algorithm = (algorithm_str == "minimax") ? 1 : 2;
@@ -117,6 +121,8 @@ int readConfig()
     cout << "player-even: " << player_even_str << ", player_even: " << player_even << endl;
     cout << "player-odd: " << player_odd_str << ", player_odd: " << player_odd << endl;
     cout << "side-to-move: " << side_to_move << endl;
+    cout << "even-has-won: " << even_has_won << endl;
+    cout << "odd-to-move: " << odd_has_won << endl;
     cout << "depth: " << depth << endl;
     cout << "algorithm_str: " << algorithm_str << ", algorithm: " << algorithm << endl;
     cout << "init_board: ";
@@ -224,6 +230,8 @@ int main()
     originDepth = (Depth)depth;
 
     position.lastMove = last_move;
+    position.haveWon[EVEN] = even_has_won;
+    position.haveWon[ODD] = odd_has_won;
 
     position.print();
     position.step = 0;
