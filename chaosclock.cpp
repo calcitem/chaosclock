@@ -7,6 +7,10 @@
 
 #include "config.h"
 
+#pragma warning(disable : 4189)
+#pragma warning(disable : 4267)
+#pragma warning(disable : 4244)
+
 using namespace std;
 
 struct pieces {
