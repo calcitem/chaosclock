@@ -16,12 +16,12 @@
 
 // This is a C++ implementation of the "Chaos Clock" game.
 // In this game, two players duel by moving pieces on a board with 12 positions.
-// "Chaos Clock" is a two-player game, with each side referred to as "White"
-// and "Black". The board is a circular board numbered clockwise from 1 to
+// "Chaos Clock" is a two-player game, with each side referred to as "Even"
+// and "Odd". The board is a circular board numbered clockwise from 1 to
 // 12, with 12 random pieces initially distributed on the 12 empty positions.
 // (In the program, for convenience of calculation, position 12 is represented
 // by the number 0.) It is not allowed to have a piece in the "correct
-// position". The order of play is that Black moves first, and then both
+// position". The order of play is that Even moves first, and then both
 // players take turns moving. There are three types of moves: move a piece, drop
 // a piece, or do not move. "Moving a piece" means picking up any piece on the
 // board, moving it n steps clockwise, and eating the piece on the landing
@@ -56,8 +56,8 @@ extern int algorithm;
 extern int init_board[12];
 static int last_move;
 
-static string player_one_str, player_two_str, algorithm_str, board_str;
-static int side_to_move, depth, player_one, player_two;
+static string player_even_str, player_odd_str, algorithm_str, board_str;
+static int side_to_move, depth, player_even, player_odd;
 
 static bool isAi[] = {
     false, true
@@ -82,12 +82,12 @@ int readConfig()
             value.erase(value.find_last_not_of(" \t\n\r\f\v") + 1);
         }
 
-        if (variable == "player-one") {
-            player_one_str = value;
-            player_one = (player_one_str == "ai") ? 1 : 2;
-        } else if (variable == "player-two") {
-            player_two_str = value;
-            player_two = (player_two_str == "ai") ? 1 : 2;
+        if (variable == "player-even") {
+            player_even_str = value;
+            player_even = (player_even_str == "ai") ? 1 : 2;
+        } else if (variable == "player-odd") {
+            player_odd_str = value;
+            player_odd = (player_odd_str == "ai") ? 1 : 2;
         } else if (variable == "side-to-move") {
             side_to_move = stoi(value);
         } else if (variable == "depth") {
@@ -114,8 +114,8 @@ int readConfig()
         }
     }
 
-    cout << "player-one: " << player_one_str << ", player_one: " << player_one << endl;
-    cout << "player-two: " << player_two_str << ", player_two: " << player_two << endl;
+    cout << "player-even: " << player_even_str << ", player_even: " << player_even << endl;
+    cout << "player-odd: " << player_odd_str << ", player_odd: " << player_odd << endl;
     cout << "side-to-move: " << side_to_move << endl;
     cout << "depth: " << depth << endl;
     cout << "algorithm_str: " << algorithm_str << ", algorithm: " << algorithm << endl;
@@ -201,27 +201,29 @@ int main()
 
     position.initBoard();
 
-    if (player_one == 1) {
+    if (player_even == 1) {
         isAi[0] = true;
     } else {
         isAi[0] = false;
     }
 
-    if (player_two == 1) {
+    if (player_odd == 1) {
         isAi[1] = true;
     } else {
         isAi[1] = false;
     }
 
     if (side_to_move == 1) {
-        pos.sideToMove = WHITE;
+        position.sideToMove = ODD;
+    } else if (side_to_move == 0) {
+        position.sideToMove = EVEN;
     } else {
-        pos.sideToMove = BLACK;
+        assert(0);
     }
 
     originDepth = (Depth)depth;
 
-    pos.lastMove = last_move;
+    position.lastMove = last_move;
 
     position.print();
     position.step = 0;

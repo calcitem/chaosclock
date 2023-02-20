@@ -51,7 +51,7 @@ begin:
     //             }
     //
     //             pos->set(StartFEN, Threads.main());
-    //             Threads.main()->us = WHITE; // WAR
+    //             Threads.main()->us = ODD; // WAR
     //             break;
     //         }
     // #else

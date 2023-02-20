@@ -31,10 +31,10 @@ bool Position::reset()
     inHand.clear();
     lastMove = -2;
     step = 0;
-    sideToMove = BLACK;
+    sideToMove = EVEN;
     result = GameResult::none;
     moveList.clear();
-    haveWon[WHITE] = haveWon[BLACK] = false;
+    haveWon[ODD] = haveWon[EVEN] = false;
 
     return true;
 }
@@ -92,10 +92,10 @@ void Position::initBoard()
 
 void Position::changeSideToMove()
 {
-    if (sideToMove == BLACK) {
-        sideToMove = WHITE;
+    if (sideToMove == EVEN) {
+        sideToMove = ODD;
     } else {
-        sideToMove = BLACK;
+        sideToMove = EVEN;
     }
 }
 
@@ -279,7 +279,7 @@ bool Position::isFixed(int number)
 
 bool Position::isAllFixed(Color c)
 {
-    if (c == BLACK) {
+    if (c == EVEN) {
         for (int i = 0; i < 12; i += 2) {
             if (!isFixed(i)) {
                 return false;
@@ -443,11 +443,11 @@ void Position::printSideToMove()
     cout << "\n----------------------------------------------------------" << endl
          << endl;
 
-    if (sideToMove == WHITE) {
-        cout << "White";
+    if (sideToMove == ODD) {
+        cout << "Odd";
         cout << endl;
     } else {
-        cout << "Black";
+        cout << "Even";
         cout << endl;
     }
 }
@@ -455,7 +455,7 @@ void Position::printSideToMove()
 // Output the current game state
 void Position::print()
 {
-    if (sideToMove == BLACK) {
+    if (sideToMove == EVEN) {
         //cout << "\033[33m";
     }
 
@@ -467,7 +467,7 @@ void Position::print()
     printMoveList();
     printSideToMove();
 
-    if (sideToMove == BLACK) {
+    if (sideToMove == EVEN) {
         //cout << "\033[0m";
     }
 }
