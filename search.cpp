@@ -134,12 +134,6 @@ Value qsearch(Position *pos, Depth depth,
     const Move nextMove = mp.next_move();
     const int moveCount = mp.move_count();
 
-    if (moveCount == 1 && depth == originDepth) {
-        bestMove = nextMove;
-        bestValue = VALUE_UNIQUE;
-        return bestValue;
-    }
-
     if (depth == originDepth) {
         cout << "\nMove count = " << moveCount << endl;
     }
@@ -235,12 +229,6 @@ Value minimax(Position *pos, Depth depth)
     MovePicker mp(*pos);
     const Move nextMove = mp.next_move();
     const int moveCount = mp.move_count();
-
-    if (moveCount == 1 && depth == originDepth) {
-        bestMove = nextMove;
-        bestValue = VALUE_UNIQUE;
-        return bestValue;
-    }
 
     // Loop through the moves and recursively evaluate the position after each
     // move.
