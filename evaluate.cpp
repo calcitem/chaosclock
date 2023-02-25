@@ -45,10 +45,13 @@ Value Evaluation::value() const
 {
     Value value = VALUE_ZERO;
 
+#if 0
+    // TODO: Disable for performance
     if (pos.has_repeat()) {
         return VALUE_DRAW;
     }
-    
+#endif
+
     switch (pos.result) {
     case GameResult::bothLose:
         value = VALUE_BOTH_LOSE;
