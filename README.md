@@ -267,6 +267,36 @@ Last move: 8
 Move list: 6, 3, 10, 11, 8
 ```
 
+对应配置 (计算慢)：
+
+```shell
+# ai or human
+player-even=ai
+player-odd=ai
+
+# Even = 0, Odd = 1
+side-to-move=1
+
+# Search depth
+depth=20
+
+# minimax or alpha-beta
+algorithm=minimax
+
+# Such as 6, 11, 8, 9, 5, 4, 1, 10, 7, 0, 2, 3
+# -1 means empty point.
+board=-1, 2, 6, 3, 9, 10, 0, -1, 8, 5, 7, 11
+
+# Last move, set to -2 if intial state
+last-move=8
+
+# Even has won
+even-has-won=0
+
+# Odd has won
+odd-has-won=0
+```
+
 9，把对方的2吃了。
 
 ```
@@ -285,6 +315,36 @@ Human: 9
 Last move: 9
 
 Move list: 6, 3, 10, 11, 8, 9
+```
+
+对应配置 (计算慢)：
+
+```shell
+# ai or human
+player-even=ai
+player-odd=ai
+
+# Even = 0, Odd = 1
+side-to-move=0
+
+# Search depth
+depth=20
+
+# minimax or alpha-beta
+algorithm=minimax
+
+# Such as 6, 11, 8, 9, 5, 4, 1, 10, 7, 0, 2, 3
+# -1 means empty point.
+board=-1, 9, 6, 3, -1, 10, 0, -1, 8, 5, 7, 11
+
+# Last move, set to -2 if intial state
+last-move=9
+
+# Even has won
+even-has-won=0
+
+# Odd has won
+odd-has-won=0
 ```
 
 2，把6吃掉，胜利在望。
@@ -307,6 +367,36 @@ Last move: 2
 Move list: 6, 3, 10, 11, 8, 9, 2
 ```
 
+对应配置，AI 认为此局面双赢。 (Minimax 较慢， Alpha-Beta 很快)
+
+```shell
+# ai or human
+player-even=ai
+player-odd=ai
+
+# Even = 0, Odd = 1
+side-to-move=1
+
+# Search depth
+depth=20
+
+# minimax or alpha-beta
+algorithm=minimax
+
+# Such as 6, 11, 8, 9, 5, 4, 1, 10, 7, 0, 2, 3
+# -1 means empty point.
+board=-1, 9, 2, 3, -1, 10, 0, -1, 8, 5, 7, 11
+
+# Last move, set to -2 if intial state
+last-move=2
+
+# Even has won
+even-has-won=0
+
+# Odd has won
+odd-has-won=0
+```
+
 1，把9吃掉。
 
 ```
@@ -325,6 +415,36 @@ Human: 1
 Last move: 1
 
 Move list: 6, 3, 10, 11, 8, 9, 2, 1
+```
+
+对应配置：
+
+```shell
+# ai or human
+player-even=ai
+player-odd=ai
+
+# Even = 0, Odd = 1
+side-to-move=0
+
+# Search depth
+depth=20
+
+# minimax or alpha-beta
+algorithm=minimax
+
+# Such as 6, 11, 8, 9, 5, 4, 1, 10, 7, 0, 2, 3
+# -1 means empty point.
+board=-1, 1, 2, 3, -1, 10, 0, -1, 8, 5, 7, 11
+
+# Last move, set to -2 if intial state
+last-move=1
+
+# Even has won
+even-has-won=0
+
+# Odd has won
+odd-has-won=0
 ```
 
 6，继续狂奔。
@@ -365,6 +485,36 @@ Human: 9
 Last move: 9
 
 Move list: 6, 3, 10, 11, 8, 9, 2, 1, 6, 9
+```
+
+对应配置：
+
+```shell
+# ai or human
+player-even=ai
+player-odd=ai
+
+# Even = 0, Odd = 1
+side-to-move=0
+
+# Search depth
+depth=20
+
+# minimax or alpha-beta
+algorithm=minimax
+
+# Such as 6, 11, 8, 9, 5, 4, 1, 10, 7, 0, 2, 3
+# -1 means empty point.
+board=-1, 1, 2, 3, -1, 10, 6, -1, 8, 9, 7, 11
+
+# Last move, set to -2 if intial state
+last-move=9
+
+# Even has won
+even-has-won=0
+
+# Odd has won
+odd-has-won=0
 ```
 
 12，准备要赢。
@@ -408,8 +558,34 @@ Last move: 7
 Move list: 6, 3, 10, 11, 8, 9, 2, 1, 6, 9, 0, 7
 ```
 
-```
+对应配置：
 
+```shell
+# ai or human
+player-even=ai
+player-odd=ai
+
+# Even = 0, Odd = 1
+side-to-move=0
+
+# Search depth
+depth=20
+
+# minimax or alpha-beta
+algorithm=minimax
+
+# Such as 6, 11, 8, 9, 5, 4, 1, 10, 7, 0, 2, 3
+# -1 means empty point.
+board=0, 1, 2, 3, -1, 7, 6, -1, 8, 9, -1, 11
+
+# Last move, set to -2 if intial state
+last-move=7
+
+# Even has won
+even-has-won=0
+
+# Odd has won
+odd-has-won=0
 ```
 
 10，一路领先。
@@ -432,6 +608,36 @@ Last move: 10
 Move list: 6, 3, 10, 11, 8, 9, 2, 1, 6, 9, 0, 7, 10
 ```
 
+对应配置:
+
+```shell
+# ai or human
+player-even=ai
+player-odd=ai
+
+# Even = 0, Odd = 1
+side-to-move=1
+
+# Search depth
+depth=20
+
+# minimax or alpha-beta
+algorithm=minimax
+
+# Such as 6, 11, 8, 9, 5, 4, 1, 10, 7, 0, 2, 3
+# -1 means empty point.
+board=0, 1, 2, 3, -1, 7, 6, -1, 8, 9, 10, 11
+
+# Last move, set to -2 if intial state
+last-move=10
+
+# Even has won
+even-has-won=0
+
+# Odd has won
+odd-has-won=0
+```
+
 5
 
 ```
@@ -450,6 +656,36 @@ Human: 5
 Last move: 5
 
 Move list: 6, 3, 10, 11, 8, 9, 2, 1, 6, 9, 0, 7, 10, 5
+```
+
+对应配置：
+
+```shell
+# ai or human
+player-even=ai
+player-odd=ai
+
+# Even = 0, Odd = 1
+side-to-move=0
+
+# Search depth
+depth=22
+
+# minimax or alpha-beta
+algorithm=minimax
+
+# Such as 6, 11, 8, 9, 5, 4, 1, 10, 7, 0, 2, 3
+# -1 means empty point.
+board=0, 1, 2, 3, -1, 5, 6, -1, 8, 9, 10, 11
+
+# Last move, set to -2 if intial state
+last-move=5
+
+# Even has won
+even-has-won=0
+
+# Odd has won
+odd-has-won=0
 ```
 
 4
