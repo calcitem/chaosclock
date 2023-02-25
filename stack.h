@@ -83,8 +83,8 @@ public:
 
     void erase(int index)
     {
-        // TODO: Performance
-        for (int i = index; i < capacity - 1; i++) {
+        // TODO: p or p + 1?
+        for (int i = index; i < p + 1; i++) {
             arr[i] = arr[i + 1];
         }
 
