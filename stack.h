@@ -18,10 +18,12 @@
 #define STACK_H_INCLUDED
 
 #include <cstring>
+//#include <iostream>
+#include <cassert>
 
 namespace ChaosClock {
 
-template <typename T, size_t capacity = 16384>
+template <typename T, size_t capacity = 64>
 class Stack
 {
 public:
@@ -61,7 +63,14 @@ public:
 
     void push_back(const T &obj)
     {
+        //static int maxp = 0;
         p++;
+
+        //if (p > maxp)
+        //    maxp = p;
+        //std::cout << "p = " << p << "\tmaxp = " << maxp << std::endl;
+        assert(p < capacity);
+
         arr[p] = obj;
     }
 
