@@ -44,12 +44,14 @@
 #include <algorithm>
 #include <fstream>
 #include <vector>
+#include <chrono>
 
 #include "types.h"
 #include "position.h"
 #include "search.h"
 
 using namespace std;
+using namespace std::chrono;
 
 extern Depth originDepth;
 extern int algorithm;
@@ -236,6 +238,8 @@ int main()
     position.print();
     position.step = 0;
 
+    auto start = high_resolution_clock::now();
+
     for (;;) {
         position.step++;
 
@@ -275,7 +279,10 @@ int main()
         position.print();
     }
 
-    cout << "Congratulations on completing the game!" << endl;
+    auto end = high_resolution_clock::now();
+    auto duration = duration_cast<milliseconds>(end - start);
+
+    cout << "\nDuration: " << duration.count() << " ms\n" << endl;
 
     system("pause");
     return 0;
