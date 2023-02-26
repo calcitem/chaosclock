@@ -17,8 +17,6 @@
 #include "position.h"
 #include "evaluate.h"
 
-extern ChaosClock::Stack<Position> ss;
-
 namespace {
 
 class Evaluation

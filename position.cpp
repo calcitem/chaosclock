@@ -20,8 +20,6 @@
 #include "config.h"
 #include "stack.h"
 
-extern ChaosClock::Stack<Position> ss;
-
 bool Position::reset()
 {
     gamePly = 0;
@@ -249,7 +247,7 @@ GameStatus Position::do_move(int number)
 /// Position::undo_move() unmakes a move. When it returns, the position should
 /// be restored to exactly the same state as before the move was made.
 
-void Position::undo_move()
+void Position::undo_move(ChaosClock::Stack<Position> &ss)
 {
     // Why it doesn't work?
     //std::memcpy(this, ss.top(), sizeof(Position));
@@ -474,11 +472,13 @@ void Position::print()
 
 bool Position::has_repeat() {
     // TODO: Performance
+#if 0
     for (int i = 0; i < ss.size() - 1; i++)
     {
         if (!std::memcmp(ss[i].board, this->board, sizeof(this->board))) {
             return true;
         }
     }
+#endif
     return false;
 }

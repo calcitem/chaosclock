@@ -32,11 +32,14 @@ public:
     Stack(const Stack &other) { *this = other; }
 
     ~Stack() {
+#if 0
+        // TODO: Why cannot delete?
         if (arr != nullptr) {
             delete[] arr;
         } 
         
         arr = nullptr;
+#endif
     }
 
     Stack &operator=(const Stack &other)

@@ -166,7 +166,7 @@ public:
     // give up.
     GameStatus do_move(int number);
 
-    void undo_move();
+    void undo_move(ChaosClock::Stack<Position> &ss);
 
     // The pieces of both sides are in the upright position, the game is over
     bool bothWin();

@@ -25,6 +25,8 @@
 
 //#define RANDOM_POSITION
 
+#define USE_POSITION_STACK
+
 #define BOTH_LOSE_THRESHOLD 50
 
 #endif // INCLUDE_CONFIG_H_

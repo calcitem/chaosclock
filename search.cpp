@@ -20,6 +20,8 @@
 #include "search.h"
 #include <string>
 
+#include "config.h"
+
 using Eval::evaluate;
 
 Position rootPos;
@@ -29,10 +31,10 @@ Move bestMove {MOVE_NONE};
 Value bestvalue {VALUE_ZERO};
 Value lastvalue {VALUE_ZERO};
 
-Value minimax(Position *pos, Depth depth);
+Value minimax(Position *pos, Depth depth, ChaosClock::Stack<Position> &ss);
 
-Value qsearch(Position *pos, Depth depth,
-              Value alpha, Value beta);
+Value qsearch(Position *pos, Depth depth, Value alpha, Value beta,
+              ChaosClock::Stack<Position> &ss);
 
 void go(Position *pos)
 {
@@ -64,7 +66,6 @@ begin:
 #endif
 }
 
-ChaosClock::Stack<Position> ss;
 int algorithm;
 
 /// start_thinking() is the main iterative deepening loop. It calls search()
@@ -73,6 +74,8 @@ int algorithm;
 
 Move start_thinking(const Position *pos)
 {
+    ChaosClock::Stack<Position> ss;
+
     // rootPos = pos;
     std::memcpy(&rootPos, pos, sizeof(Position));
 
@@ -80,12 +83,12 @@ Move start_thinking(const Position *pos)
     const Depth d = originDepth;
 
     if (algorithm == 1) {
-        value = minimax(&rootPos, d);
+        value = minimax(&rootPos, d, ss);
     } else if (algorithm == 2) {
         Value alpha = VALUE_NONE;
         Value beta = VALUE_NONE;
 
-        value = qsearch(&rootPos, d, alpha, beta);
+        value = qsearch(&rootPos, d, alpha, beta, ss);
     } else {
         assert(0);
     }
@@ -93,13 +96,13 @@ Move start_thinking(const Position *pos)
     lastvalue = bestvalue;
     bestvalue = value;
 
-    ss.clear();
+    //ss.clear();
 
     return bestMove;
 }
 
-Value qsearch(Position *pos, Depth depth,
-              Value alpha, Value beta)
+Value qsearch(Position *pos, Depth depth, Value alpha, Value beta,
+              ChaosClock::Stack<Position> &ss)
 {
     Value value;
     Value bestValue = -VALUE_INFINITE;
@@ -140,8 +143,11 @@ Value qsearch(Position *pos, Depth depth,
 
     // Loop through the moves until no moves remain or a beta cutoff occurs
     for (int i = 0; i < moveCount; i++) {
-        //ss.push(*pos);
+#ifdef USE_POSITION_STACK
+        ss.push(*pos);
+#else
         Position backupPosition = *pos;
+#endif
         const Color before = pos->sideToMove;
         const Move move = mp.moves[i].move;
 
@@ -152,9 +158,9 @@ Value qsearch(Position *pos, Depth depth,
         const Color after = pos->sideToMove;
 
         if (after != before) {
-            value = -qsearch(pos, depth - 1, -beta, -alpha);
+            value = -qsearch(pos, depth - 1, -beta, -alpha, ss);
         } else {
-            value = qsearch(pos, depth - 1, alpha, beta);
+            value = qsearch(pos, depth - 1, alpha, beta, ss);
         }
 
         if (value == -VALUE_BOTH_WIN) {
@@ -165,8 +171,11 @@ Value qsearch(Position *pos, Depth depth,
             value = VALUE_BOTH_LOSE;
         }
 
-        //pos->undo_move();
+#ifdef USE_POSITION_STACK
+        pos->undo_move(ss);
+#else
         *pos = backupPosition;
+#endif
 
         if (value >= bestValue) {
             bestValue = value;
@@ -200,7 +209,7 @@ Value qsearch(Position *pos, Depth depth,
     return bestValue;
 }
 
-Value minimax(Position *pos, Depth depth)
+Value minimax(Position *pos, Depth depth, ChaosClock::Stack<Position> &ss)
 {
     Value value;
     Value bestValue = -VALUE_INFINITE;
@@ -229,8 +238,11 @@ Value minimax(Position *pos, Depth depth)
     }
 
     for (int i = 0; i < moveCount; i++) {
-        //ss.push(*pos);
+#ifdef USE_POSITION_STACK
+        ss.push(*pos);
+#else
         Position backupPosition = *pos;
+#endif
 
         const Color before = pos->sideToMove;
         const Move move = mp.moves[i].move;
@@ -242,9 +254,9 @@ Value minimax(Position *pos, Depth depth)
         const Color after = pos->sideToMove;
 
         if (after != before) {
-            value = -minimax(pos, depth - 1);
+            value = -minimax(pos, depth - 1, ss);
         } else {
-            value = minimax(pos, depth - 1);
+            value = minimax(pos, depth - 1, ss);
         }
 
         if (value == -VALUE_BOTH_WIN) {
@@ -255,8 +267,12 @@ Value minimax(Position *pos, Depth depth)
             value = VALUE_BOTH_LOSE;
         }
 
-        //pos->undo_move();
+#ifdef USE_POSITION_STACK
+        pos->undo_move(ss);
+#else
         *pos = backupPosition;
+#endif
+
 
         if (value > bestValue) {
             bestValue = value;
