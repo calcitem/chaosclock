@@ -227,6 +227,36 @@ Last move: 10
 Move list: 6, 3, 10
 ```
 
+对应配置 （计算慢）：
+
+```shell
+# ai or human
+player-even=ai
+player-odd=ai
+
+# Even = 0, Odd = 1
+side-to-move=1
+
+# Search depth
+depth=13
+
+# minimax or alpha-beta
+algorithm=minimax
+
+# Such as 6, 11, 8, 9, 5, 4, 1, 10, 7, 0, 2, 3
+# -1 means empty point.
+board=-1, 2, 6, 3, 9, 10, 0, -1, -1, 5, 7, 1
+
+# Last move, set to -2 if intial state
+last-move=10
+
+# Even has won
+even-has-won=0
+
+# Odd has won
+odd-has-won=0
+```
+
 11，吃掉1，使己方的9摆脱被卡住的风险。
 
 ```
@@ -245,6 +275,35 @@ Human: 11
 Last move: 11
 
 Move list: 6, 3, 10, 11
+```
+对应配置 （耗时 27 秒）：
+
+```shell
+# ai or human
+player-even=ai
+player-odd=ai
+
+# Even = 0, Odd = 1
+side-to-move=0
+
+# Search depth
+depth=13
+
+# minimax or alpha-beta
+algorithm=minimax
+
+# Such as 6, 11, 8, 9, 5, 4, 1, 10, 7, 0, 2, 3
+# -1 means empty point.
+board=-1, 2, 6, 3, 9, 10, 0, -1, -1, 5, 7, 11
+
+# Last move, set to -2 if intial state
+last-move=11
+
+# Even has won
+even-has-won=0
+
+# Odd has won
+odd-has-won=0
 ```
 
 8，抢个跑，搞不好还能赢。
@@ -267,7 +326,7 @@ Last move: 8
 Move list: 6, 3, 10, 11, 8
 ```
 
-对应配置 (计算慢)：
+对应配置 (计算耗时约23秒)：
 
 ```shell
 # ai or human
@@ -317,7 +376,7 @@ Last move: 9
 Move list: 6, 3, 10, 11, 8, 9
 ```
 
-对应配置 (计算慢)：
+对应配置：
 
 ```shell
 # ai or human
@@ -367,7 +426,7 @@ Last move: 2
 Move list: 6, 3, 10, 11, 8, 9, 2
 ```
 
-对应配置，AI 认为此局面双赢。 (Minimax 较慢， Alpha-Beta 很快)
+对应配置，AI 认为此局面双赢。
 
 ```shell
 # ai or human
