@@ -239,7 +239,7 @@ Value minimax(Position *pos, Depth depth, ChaosClock::Stack<Position> &ss)
 
     for (int i = 0; i < moveCount; i++) {
 #ifdef USE_POSITION_STACK
-        ss.push(*pos);
+        ss.push_back(*pos);
 #else
         Position backupPosition = *pos;
 #endif
