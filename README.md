@@ -136,7 +136,7 @@ move_available = {
 
 初始局面：
 
-```
+```shell
 # ai or human
 player-even=human
 player-odd=human

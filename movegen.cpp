@@ -28,7 +28,7 @@ ExtMove *generate(Position &pos, ExtMove *moveList)
     for (int i = 0; i < 12; i++) {
         pc = pos.board[i];
 
-        if (pc > 0 && pc != i && pc != pos.lastMove) {
+        if (pc > -1 && pc != i && pc != pos.lastMove) {
             int newLocation = (i + pc) % 12;
 
             if (!pos.isFixed(newLocation)) {
