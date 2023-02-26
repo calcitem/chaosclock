@@ -51,7 +51,10 @@ ExtMove *generate(Position &pos, ExtMove *moveList)
         }
     }
 
-    *cur++ = MOVE_PASS;
+    // Pass only when no move to do
+    if (cur == moveList) {
+        *cur++ = MOVE_PASS;
+    }
 
     return cur;
 }
