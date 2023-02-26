@@ -25,6 +25,8 @@
 
 //#define RANDOM_POSITION
 
+//#define SORT_MOVEGEN_RESULT
+
 #define USE_POSITION_STACK
 
 #define BOTH_LOSE_THRESHOLD 50

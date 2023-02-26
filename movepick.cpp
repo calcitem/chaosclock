@@ -64,7 +64,10 @@ Move MovePicker::next_move()
     moveCount = static_cast<int>(endMoves - moves);
 
     score();
+
+#ifdef SORT_MOVEGEN_RESULT
     partial_insertion_sort(moves, endMoves, INT_MIN);
+#endif
 
     return *moves;
 }
