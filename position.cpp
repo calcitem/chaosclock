@@ -252,6 +252,7 @@ void Position::undo_move(ChaosClock::Stack<Position> &ss)
     // Why it doesn't work?
     //std::memcpy(this, ss.top(), sizeof(Position));
 
+#if 1
     const Position *other = ss.top();
 
     memcpy(this->board, other->board, sizeof(this->board));
@@ -264,6 +265,7 @@ void Position::undo_move(ChaosClock::Stack<Position> &ss)
     this->moveList = other->moveList;
     this->st = other->st;
     memcpy(this->haveWon, other->haveWon, sizeof(haveWon));
+#endif
 
     ss.pop();
 }

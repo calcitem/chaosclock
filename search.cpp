@@ -280,9 +280,12 @@ Value minimax(Position *pos, Depth depth, ChaosClock::Stack<Position> &ss)
                 bestMove = move;
             }
         }
-
+#if 0
+        if (depth > originDepth - 4) {
+#else
         if (depth == originDepth) {
-            cout << "Move: " << (int)move << ",  Value = " << (int)value;
+#endif
+            cout << "[D" << (int)depth << "]  Move : " << (int)move << "  Value = " << (int)value;
 
             if (value == bestvalue) {
                 cout <<  " *";
