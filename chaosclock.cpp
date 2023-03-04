@@ -41,7 +41,13 @@ struct Position
 
     Position()
     {
-        children = nullptr;
+        memset(board, 0, sizeof(board));
+        last_move = 0;
+        player = 0;
+        value = 0;
+        depth = 0;
+        sub_value = 0;
+        children = NULL;
         child_count = 0;
         child_capacity = 0;
     }
@@ -52,6 +58,37 @@ struct Position
             delete children[i];
         }
         free(children);
+    }
+
+    // copy constructor
+    Position(const Position &other)
+    {
+        memcpy(board, other.board, sizeof(board));
+        last_move = other.last_move;
+        player = other.player;
+        value = other.value;
+        pieces_data = other.pieces_data;
+        depth = other.depth;
+        sub_value = other.sub_value;
+        child_count = 0;
+        child_capacity = other.child_capacity;
+
+        // allocate memory for children array
+        if (other.child_count > 0) {
+            children = (Position **)malloc(sizeof(Position *) *
+                                           other.child_capacity);
+            memset(children, 0, sizeof(Position *) * other.child_capacity);
+        } else {
+            children = NULL;
+        }
+
+        // copy children nodes
+        for (int i = 0; i < other.child_count; i++) {
+            children[i] = new Position(*other.children[i]);
+        }
+
+        // set child count
+        child_count = other.child_count;
     }
 };
 
@@ -329,17 +366,22 @@ Position *roll(Position *pos)
 {
     pos->value = ifEnd(*pos);
 
-    // allocate initial capacity for children array
-    pos->child_capacity = 16;
-    pos->children = (Position **)malloc(sizeof(Position *) *
-                                        pos->child_capacity);
+    // deallocate children nodes
+    for (int i = 0; i < pos->child_count; i++) {
+        delete pos->children[i];
+    }
+    free(pos->children);
+
+    pos->children = NULL;
     pos->child_count = 0;
+    pos->child_capacity = 0;
 
     roll_sum++;
     max_depth = max(pos->depth, max_depth);
     if (pos->depth > 30 || roll_sum > 1.2e7) {
         return pos;
     }
+
     // children
     if (pos->value > 0) {
         result_sum++;
@@ -447,6 +489,9 @@ Position *roll(Position *pos)
             // update value
             int max_value = pos->value;
             for (int i = 0; i < pos->child_count; i++) {
+                if (pos->children[i] == NULL) {
+                    continue;
+                }
                 int this_value = pos->children[i]->value;
                 if ((this_value == 4 || this_value == 1) &&
                     pos->children[i]->player != pos->player) {
@@ -457,11 +502,10 @@ Position *roll(Position *pos)
                 }
             }
             pos->value = max_value;
+            return pos;
         }
-        return pos;
     }
 }
-
 
 int main()
 {
@@ -508,8 +552,11 @@ int main()
 
         cin >> pick_child;
         if (pick_child != "-3") {
-            Position *new_pos_child = new_pos->children[stoi(pick_child)];
-            new_pos = new_pos_child;
+            int child_index = stoi(pick_child);
+            if (child_index >= 0 && child_index < new_pos->child_count) {
+                Position *new_pos_child = new_pos->children[child_index];
+                new_pos = new_pos_child;
+            }
         }
     } while (pick_child != "-3");
 
