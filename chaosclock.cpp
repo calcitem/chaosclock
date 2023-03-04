@@ -346,7 +346,7 @@ Position roll(Position pos)
     pos.children.clear();
     roll_sum++;
     max_depth = max(pos.depth, max_depth);
-    if (pos.depth > 24 || roll_sum > 1.2e5) {
+    if (pos.depth > 30 || roll_sum > 1.2e7) {
         return pos;
     }
     // children
