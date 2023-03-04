@@ -388,9 +388,9 @@ Position roll(Position pos)
                 children.emplace_back(new_pos);
             }
         }
-        vector<Position> _children = sortChildren(pos, children);
-        for (size_t sa = 0; sa < _children.size(); sa++) {
-            pos.children.emplace_back(roll(_children[sa]));
+        //vector<Position> _children = sortChildren(pos, children);
+        for (size_t sa = 0; sa < children.size(); sa++) {
+            pos.children.emplace_back(roll(children[sa]));
             if ((pos.children[sa].value == 1 &&
                  pos.children[sa].player != pos.player) ||
                 (pos.children[sa].value == 4 &&
