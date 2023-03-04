@@ -328,10 +328,13 @@ int result_sum = 0;
 Position *roll(Position *pos)
 {
     pos->value = ifEnd(*pos);
-    for (int i = 0; i < pos->child_count; i++) {
-        delete pos->children[i];
-    }
+
+    // allocate initial capacity for children array
+    pos->child_capacity = 16;
+    pos->children = (Position **)malloc(sizeof(Position *) *
+                                        pos->child_capacity);
     pos->child_count = 0;
+
     roll_sum++;
     max_depth = max(pos->depth, max_depth);
     if (pos->depth > 30 || roll_sum > 1.2e7) {
@@ -348,83 +351,117 @@ Position *roll(Position *pos)
         vectorRemove(move, pos->last_move);
         if (1 == pos->player)
             vectorRemove(move, 12);
-        for (size_t y = 0; y < move.size(); y++) {
-            Position *new_pos = new Position();
-            memcpy(new_pos->board, pos->board, sizeof(pos->board));
-            new_pos->last_move = move[y];
-            new_pos->player = 1 - pos->player;
-            new_pos->depth = pos->depth + 1;
-            if (y < move.size() - pos->pieces_data.hand[pos->player].size()) {
-                int x = vectorIndexOf(new_pos->board, new_pos->last_move);
-                new_pos->board[x] = 0;
-                if (new_pos->last_move != 12) {
-                    new_pos->board[(x + new_pos->last_move) % 12] =
-                        new_pos->last_move;
-                }
-                new_pos->pieces_data = piecesValue(*new_pos);
-            } else {
-                new_pos->board[new_pos->last_move - 1] = new_pos->last_move;
-                int onum = pos->board[new_pos->last_move - 1];
-                if (onum > 0 && onum % 2 != pos->player) {
-                    new_pos->player = pos->player;
-                }
-                new_pos->pieces_data = piecesValue(*new_pos);
-            }
-            if (pos->child_count >= pos->child_capacity) {
-                pos->child_capacity += 10;
-                pos->children = (Position **)realloc(
-                    pos->children, pos->child_capacity * sizeof(Position *));
-            }
-            pos->children[pos->child_count++] = new_pos;
-        }
-        // vector<Position *> _children = sortChildren(pos, children);
-        for (int sa = 0; sa < pos->child_count; sa++) {
-            Position *child = roll(pos->children[sa]);
-            if ((pos->children[sa]->value == 1 &&
-                 pos->children[sa]->player != pos->player) ||
-                (pos->children[sa]->value == 4 &&
-                 pos->children[sa]->player == pos->player)) {
-                break;
-            }
-        }
-        if (move.size() == 0 ||
-            pos->child_count == 1 &&
-                pos->pieces_data.dead[1 - pos->player].size() -
-                        pos->children[0]
-                            ->pieces_data.dead[1 - pos->player]
-                            .size() >
-                    0) {
-            if (pos->last_move == 0) {
-                pos->value = 2;
+
+        // reserve enough capacity for children array
+        if (pos->child_capacity < move.size()) {
+            pos->child_capacity = move.size() * 2;
+            pos->children = (Position **)realloc(
+                pos->children, sizeof(Position *) * pos->child_capacity);
+
+            // check if realloc() failed
+            if (pos->children == NULL) {
+                // deallocate previously allocated memory
                 for (int i = 0; i < pos->child_count; i++) {
                     delete pos->children[i];
                 }
-                pos->child_count = 0;
+                free(pos->children);
+
+                // throw an exception or exit program
+                throw std::bad_alloc();
+            }
+        }
+
+        // create children nodes
+        for (size_t y = 0; y < move.size(); y++) {
+            Position *new_pos = new Position();
+            memcpy(new_pos->board, pos->board, sizeof(pos->board));
+            int c = move[y];
+            new_pos->depth = pos->depth + 1;
+            new_pos->last_move = c;
+            new_pos->player = 1 - pos->player;
+            if (y < move.size() - pos->pieces_data.hand[pos->player].size()) {
+                int x = vectorIndexOf(new_pos->board, c);
+                new_pos->board[x] = 0;
+                if (c != 12) {
+                    new_pos->board[(x + c) % 12] = c;
+                }
+                new_pos->pieces_data = piecesValue(*new_pos);
+                pos->children[pos->child_count++] = roll(new_pos);
             } else {
-                Position *pass_pos = new Position();
-                memcpy(pass_pos->board, pos->board, sizeof(pos->board));
-                pass_pos->last_move = 0;
-                pass_pos->player = 1 - pos->player;
-                pass_pos->depth = pos->depth + 1;
-                pos->children[pos->child_count++] = roll(pass_pos);
+                new_pos->board[c - 1] = c;
+                int onum = pos->board[c - 1];
+                if (onum > 0 && onum % 2 != pos->player) {
+                    new_pos->player = pos->player;
+                    new_pos->pieces_data = piecesValue(*new_pos);
+                    pos->children[pos->child_count++] = roll(new_pos);
+                }
             }
+
+            // update child count
+            pos->child_count = move.size();
+
+            if (pos->child_count == 0 ||
+                pos->child_count == 1 &&
+                    pos->pieces_data.dead[1 - pos->player].size() -
+                            pos->children[0]
+                                ->pieces_data.dead[1 - pos->player]
+                                .size() >
+                        0) {
+                if (pos->last_move == 0) {
+                    pos->value = 2;
+                    for (int i = 0; i < pos->child_count; i++) {
+                        delete pos->children[i];
+                    }
+                    pos->child_count = 0;
+                } else {
+                    Position *pass_pos = new Position();
+                    memcpy(pass_pos->board, pos->board, sizeof(pos->board));
+                    pass_pos->last_move = 0;
+                    pass_pos->player = 1 - pos->player;
+                    pass_pos->depth = pos->depth + 1;
+
+                    // reserve enough capacity for children array
+                    if (pos->child_capacity < 1) {
+                        pos->child_capacity = 2;
+                        pos->children = (Position **)realloc(
+                            pos->children,
+                            sizeof(Position *) * pos->child_capacity);
+
+                        // check if realloc() failed
+                        if (pos->children == NULL) {
+                            // deallocate previously allocated memory
+                            for (int i = 0; i < pos->child_count; i++) {
+                                delete pos->children[i];
+                            }
+                            free(pos->children);
+
+                            // throw an exception or exit program
+                            throw std::bad_alloc();
+                        }
+                    }
+
+                    pos->children[pos->child_count++] = roll(pass_pos);
+                }
+            }
+
+            // update value
+            int max_value = pos->value;
+            for (int i = 0; i < pos->child_count; i++) {
+                int this_value = pos->children[i]->value;
+                if ((this_value == 4 || this_value == 1) &&
+                    pos->children[i]->player != pos->player) {
+                    this_value = (this_value == 4 ? 1 : 4);
+                }
+                if (max_value < this_value) {
+                    max_value = this_value;
+                }
+            }
+            pos->value = max_value;
         }
-        // value
-        int max_value = pos->value;
-        for (int i = 0; i < pos->child_count; i++) {
-            int this_value = pos->children[i]->value;
-            if ((this_value == 4 || this_value == 1) &&
-                pos->children[i]->player != pos->player) {
-                this_value = (this_value == 4 ? 1 : 4);
-            }
-            if (max_value < this_value) {
-                max_value = this_value;
-            }
-        }
-        pos->value = max_value;
+        return pos;
     }
-    return pos;
 }
+
 
 int main()
 {
