@@ -104,10 +104,10 @@ vector<int> getRunPos(int (&board)[12], int c)
     int next_pos = (c_pos + c) % 12;
     while (board[next_pos] != next_pos + 1) {
         if (next_pos == c_pos || c == next_pos + 1) {
-            running.push_back(next_pos);
+            running.emplace_back(next_pos);
             break;
         } else {
-            running.push_back(next_pos);
+            running.emplace_back(next_pos);
         }
         next_pos = (next_pos + c) % 12;
     }
@@ -129,15 +129,15 @@ Pieces piecesValue(Position pos)
     for (int c = 1; c <= 12; c++) {
         // stick, hand, run, stop
         if (c == pos.board[c - 1]) {
-            new_pieces.stick[c % 2].push_back(c);
+            new_pieces.stick[c % 2].emplace_back(c);
         } else if (vectorIndexOf(pos.board, c) == -1) {
-            new_pieces.hand[c % 2].push_back(c);
+            new_pieces.hand[c % 2].emplace_back(c);
         } else {
             vector<int> c_run_pos = getRunPos(pos.board, c);
             if (c_run_pos.size() == 0) {
-                new_pieces.stop[c % 2].push_back(c);
+                new_pieces.stop[c % 2].emplace_back(c);
             } else {
-                new_pieces.running.push_back(c);
+                new_pieces.running.emplace_back(c);
                 run_pos_sum.insert(run_pos_sum.end(), c_run_pos.begin(),
                                    c_run_pos.end());
             }
@@ -151,7 +151,7 @@ Pieces piecesValue(Position pos)
             int stopx = new_pieces.stop[p][x];
             int stop_pos = vectorIndexOf(pos.board, stopx);
             if (vectorIndexOf(makefree, stop_pos + 1) > -1) {
-                new_pieces.free[p].push_back(stopx);
+                new_pieces.free[p].emplace_back(stopx);
                 new_pieces.stop[p].erase(new_pieces.stop[p].begin() + x);
                 makefree = vectorMerge(new_pieces.hand[p], new_pieces.free[p]);
                 x = -1;
@@ -165,8 +165,8 @@ Pieces piecesValue(Position pos)
             int c = new_pieces.stop[p][x];
             int c_pos = vectorIndexOf(pos.board, c);
             if (vectorIndexOf(run_pos_sum, c_pos) == -1) {
-                stop_delete.push_back(x);
-                new_pieces.stock[p].push_back(c);
+                stop_delete.emplace_back(x);
+                new_pieces.stock[p].emplace_back(c);
             }
         }
         while (stop_delete.size()) {
@@ -183,8 +183,8 @@ Pieces piecesValue(Position pos)
             size_t c_pos = vectorIndexOf(pos.board, c);
             // if in other player
             if (c_pos % 2 == p) {
-                stock_delete.push_back(x);
-                new_pieces.dead[p].push_back(c);
+                stock_delete.emplace_back(x);
+                new_pieces.dead[p].emplace_back(c);
             }
             // if multiple stock
             else {
@@ -196,8 +196,8 @@ Pieces piecesValue(Position pos)
                     (ms_pos + 1 == c ||
                      (vectorIndexOf(new_pieces.stock[p], ts) > -1 &&
                          ts_pos + 1 == c))) {
-                    stock_delete.push_back(x);
-                    new_pieces.dead[p].push_back(c);
+                    stock_delete.emplace_back(x);
+                    new_pieces.dead[p].emplace_back(c);
                 }
             }
         }
@@ -225,7 +225,7 @@ Position getValue(string pos_start)
     pos_find = 0;
     while (pos_start.find(';', pos_find) != string::npos) {
         pos_find = pos_start.find(';', pos_find);
-        pos_split.push_back(pos_find);
+        pos_split.emplace_back(pos_find);
         pos_find++;
     }
     if (pos_split.size() == 2) {
@@ -284,13 +284,13 @@ vector<Position> sortChildren(Position pos, vector<Position> children)
         int your_death_value = children[i].pieces_data.dead[you].size() -
                              pos.pieces_data.dead[you].size();
         if (my_death_value == 0 && your_death_value > 0) {
-            first.push_back(children[i]);
+            first.emplace_back(children[i]);
         } else if (my_good_value - your_good_value > 0) {
-            first.push_back(children[i]);
+            first.emplace_back(children[i]);
         } else if (my_good_value - your_good_value < 0) {
-            bad.push_back(children[i]);
+            bad.emplace_back(children[i]);
         } else {
-            normal.push_back(children[i]);
+            normal.emplace_back(children[i]);
         }
     }
     vector<Position> sorted_children;
@@ -375,7 +375,7 @@ Position roll(Position pos)
                     new_pos.board[(x + c) % 12] = c;
                 }
                 new_pos.pieces_data = piecesValue(new_pos);
-                children.push_back(new_pos);
+                children.emplace_back(new_pos);
             } else {
                 new_pos.board[c - 1] = c;
                 int onum = pos.board[c - 1];
@@ -383,12 +383,12 @@ Position roll(Position pos)
                     new_pos.player = pos.player;
                 }
                 new_pos.pieces_data = piecesValue(new_pos);
-                children.push_back(new_pos);
+                children.emplace_back(new_pos);
             }
         }
         vector<Position> _children = sortChildren(pos, children);
         for (size_t sa = 0; sa < _children.size(); sa++) {
-            pos.children.push_back(roll(_children[sa]));
+            pos.children.emplace_back(roll(_children[sa]));
             if ((pos.children[sa].value == 1 &&
                     pos.children[sa].player != pos.player) ||
                 (pos.children[sa].value == 4 &&
@@ -405,7 +405,7 @@ Position roll(Position pos)
                 pass_pos.depth = pos.depth + 1;
                 pass_pos.last_move = 0;
                 pass_pos.player = 1 - pos.player;
-                pos.children.push_back(roll(pass_pos));
+                pos.children.emplace_back(roll(pass_pos));
             }
         }
         // value
