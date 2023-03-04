@@ -17,10 +17,6 @@
 #ifndef INCLUDE_CONFIG_H_
 #define INCLUDE_CONFIG_H_
 
-#if _MSC_VER >= 1600
-#pragma execution_character_set("utf-8")
-#endif
-
 #define BRUTE_FORCE_ALGORITHM
 
 #endif // INCLUDE_CONFIG_H_

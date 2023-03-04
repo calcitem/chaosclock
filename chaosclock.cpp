@@ -39,7 +39,7 @@ struct position
 void vectorCout(vector<int> &v, string v_name = "ejsoon")
 {
     cout << v_name << ": ";
-    for (int x = 0; x < v.size(); x++) {
+    for (size_t x = 0; x < v.size(); x++) {
         cout << v[x] << ", ";
     }
     cout << endl;
@@ -48,9 +48,9 @@ void vectorCout(vector<int> &v, string v_name = "ejsoon")
 void vectorCout(vector<vector<int>> &v, string v_name = "ejsoon")
 {
     cout << v_name << ":" << endl;
-    for (int x = 0; x < v.size(); x++) {
+    for (size_t x = 0; x < v.size(); x++) {
         cout << x << ": ";
-        for (int y = 0; y < v[x].size(); y++) {
+        for (size_t y = 0; y < v[x].size(); y++) {
             cout << v[x][y] << ", ";
         }
         cout << endl;
@@ -67,14 +67,14 @@ void boardCout(int (&v)[12])
 
 void vectorRemove(vector<int> &v, int i)
 {
-    int vindex = find(v.begin(), v.end(), i) - v.begin();
+    size_t vindex = find(v.begin(), v.end(), i) - v.begin();
     if (vindex != v.size())
         v.erase(v.begin() + vindex);
 }
 
 int vectorIndexOf(vector<int> v, int i)
 {
-    int vindex = find(v.begin(), v.end(), i) - v.begin();
+    size_t vindex = find(v.begin(), v.end(), i) - v.begin();
     if (vindex == v.size())
         return -1;
     return vindex;
@@ -90,7 +90,7 @@ int vectorIndexOf(int (&v)[12], char i)
 
 int vectorIndexOf(int (&v)[12], int i)
 {
-    int vindex = find(v, v + 12, i) - v;
+    size_t vindex = find(v, v + 12, i) - v;
     if (vindex == 12)
         return -1;
     return vindex;
@@ -121,17 +121,6 @@ vector<int> vectorMerge(vector<int> hand, vector<int> free)
     return makefree;
 }
 
-void appendResult(position pos)
-{
-    int standardInt = pos.board[0] * 1e12 + pos.board[1] * 1e11 +
-                      pos.board[2] * 1e10 + pos.board[3] * 1e9 +
-                      pos.board[4] * 1e8 + pos.board[5] * 1e7 +
-                      pos.board[6] * 1e6 + pos.board[7] * 1e5 +
-                      pos.board[8] * 1e4 + pos.board[9] * 1e3 +
-                      pos.board[10] * 1e2 + pos.board[11] + pos.player * 24 +
-                      pos.lastmove;
-}
-
 pieces piecesValue(position pos)
 {
     pieces new_pieces;
@@ -154,10 +143,10 @@ pieces piecesValue(position pos)
         }
     }
     // free
-    for (int p = 0; p < new_pieces.stop.size(); p++) {
+    for (size_t p = 0; p < new_pieces.stop.size(); p++) {
         vector<int> makefree = vectorMerge(new_pieces.hand[p],
                                            new_pieces.free[p]);
-        for (int x = 0; x < new_pieces.stop[p].size(); x++) {
+        for (size_t x = 0; x < new_pieces.stop[p].size(); x++) {
             int stopx = new_pieces.stop[p][x];
             int stop_pos = vectorIndexOf(pos.board, stopx);
             if (vectorIndexOf(makefree, stop_pos + 1) > -1) {
@@ -169,9 +158,9 @@ pieces piecesValue(position pos)
         }
     }
     // stock
-    for (int p = 0; p < new_pieces.stop.size(); p++) {
+    for (size_t p = 0; p < new_pieces.stop.size(); p++) {
         vector<int> stop_delete;
-        for (int x = 0; x < new_pieces.stop[p].size(); x++) {
+        for (size_t x = 0; x < new_pieces.stop[p].size(); x++) {
             int c = new_pieces.stop[p][x];
             int c_pos = vectorIndexOf(pos.board, c);
             if (vectorIndexOf(run_pos_sum, c_pos) == -1) {
@@ -186,11 +175,11 @@ pieces piecesValue(position pos)
         }
     }
     // dead
-    for (int p = 0; p < new_pieces.stock.size(); p++) {
+    for (size_t p = 0; p < new_pieces.stock.size(); p++) {
         vector<int> stock_delete;
-        for (int x = 0; x < new_pieces.stock[p].size(); x++) {
+        for (size_t x = 0; x < new_pieces.stock[p].size(); x++) {
             int c = new_pieces.stock[p][x];
-            int c_pos = vectorIndexOf(pos.board, c);
+            size_t c_pos = vectorIndexOf(pos.board, c);
             // if in other player
             if (c_pos % 2 == p) {
                 stock_delete.push_back(x);
@@ -274,7 +263,7 @@ vector<position> sortChildren(position pos, vector<position> children)
     vector<position> first;
     vector<position> normal;
     vector<position> bad;
-    for (int i = 0; i < children.size(); i++) {
+    for (size_t i = 0; i < children.size(); i++) {
         int me = pos.player;
         int you = 1 - pos.player;
         int myGoodValue = children[i].pieces_data.stick[me].size() +
@@ -372,7 +361,7 @@ position roll(position pos)
         if (1 == pos.player)
             vectorRemove(move, 12);
         vector<position> children;
-        for (int y = 0; y < move.size(); y++) {
+        for (size_t y = 0; y < move.size(); y++) {
             position new_pos = pos;
             int c = move[y];
             new_pos.deep = pos.deep + 1;
@@ -397,7 +386,7 @@ position roll(position pos)
             }
         }
         vector<position> _children = sortChildren(pos, children);
-        for (int sa = 0; sa < _children.size(); sa++) {
+        for (size_t sa = 0; sa < _children.size(); sa++) {
             pos.children.push_back(roll(_children[sa]));
             if (pos.children[sa].value == 1 &&
                     pos.children[sa].player != pos.player ||
@@ -420,7 +409,7 @@ position roll(position pos)
         }
         // value
         int max_value = pos.value;
-        for (int s = 0; s < pos.children.size(); s++) {
+        for (size_t s = 0; s < pos.children.size(); s++) {
             int this_value = pos.children[s].value;
             if ((this_value == 4 || this_value == 1) &&
                 pos.children[s].player != pos.player) {
@@ -462,7 +451,7 @@ int tmain()
         cout << "player: " << new_pos.player << endl;
         cout << "value:" << new_pos.value << endl;
         cout << "available move:" << new_pos.children.size() << endl;
-        for (int lm = 0; lm < new_pos.children.size(); lm++) {
+        for (size_t lm = 0; lm < new_pos.children.size(); lm++) {
             cout << "  " << lm << ": " << new_pos.children[lm].lastmove;
             cout << " (value: " << new_pos.children[lm].value << ") ";
             cout << endl;
