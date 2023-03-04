@@ -193,8 +193,8 @@ Pieces piecesValue(Position pos)
                 int ts_pos = vectorIndexOf(pos.board, ts);
                 if (vectorIndexOf(new_pieces.stock[p], ms) > -1 &&
                     (ms_pos + 1 == c ||
-                     vectorIndexOf(new_pieces.stock[p], ts) > -1 &&
-                         ts_pos + 1 == c)) {
+                     (vectorIndexOf(new_pieces.stock[p], ts) > -1 &&
+                         ts_pos + 1 == c))) {
                     stock_delete.push_back(x);
                     new_pieces.dead[p].push_back(c);
                 }
@@ -316,17 +316,17 @@ int ifEnd(Position pos)
         return 3;
     }
     // I win
-    if (my_num == 6 && your_num < 6 ||
-        my_num + my_handle == 6 && your_dead > 0 ||
-        my_num + my_handle == 6 && your_num + your_handle <= 6 &&
-            my_num - your_num > 0) {
+    if ((my_num == 6 && your_num < 6) ||
+        (my_num + my_handle == 6 && your_dead > 0) ||
+        (my_num + my_handle == 6 && your_num + your_handle <= 6 &&
+            my_num - your_num > 0)) {
         return 4;
     }
     // I lose
-    if (my_num < 5 && your_num == 6 ||
-        your_num + your_handle == 6 && my_dead > 0 ||
-        my_num + my_handle <= 6 && your_num + your_handle == 6 &&
-            your_num - my_num > 1) {
+    if ((my_num < 5 && your_num == 6) ||
+        (your_num + your_handle == 6 && my_dead > 0) ||
+        (my_num + my_handle <= 6 && your_num + your_handle == 6 &&
+            your_num - my_num > 1)) {
         return 1;
     }
     // two lose
@@ -388,10 +388,10 @@ Position roll(Position pos)
         vector<Position> _children = sortChildren(pos, children);
         for (size_t sa = 0; sa < _children.size(); sa++) {
             pos.children.push_back(roll(_children[sa]));
-            if (pos.children[sa].value == 1 &&
-                    pos.children[sa].player != pos.player ||
-                pos.children[sa].value == 4 &&
-                    pos.children[sa].player == pos.player) {
+            if ((pos.children[sa].value == 1 &&
+                    pos.children[sa].player != pos.player) ||
+                (pos.children[sa].value == 4 &&
+                    pos.children[sa].player == pos.player)) {
                 break;
             }
         }
