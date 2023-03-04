@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <chrono>
+#include <sstream>
 
 #include "config.h"
 
@@ -37,48 +38,49 @@ struct Position
     vector<Position> children;
 };
 
-void vectorCout(vector<int> &v, string v_name = "ejsoon")
+void vectorCout(const std::vector<int> &v, const std::string &v_name = "ejsoon")
 {
-    cout << v_name << ": ";
-    for (size_t x = 0; x < v.size(); x++) {
-        cout << v[x] << ", ";
+    std::ostringstream oss;
+    oss << v_name << ": ";
+    for (const auto &elem : v) {
+        oss << elem << ", ";
     }
-    cout << endl;
+    std::cout << oss.str() << std::endl;
 }
 
-void vectorCout(vector<vector<int>> &v, string v_name = "ejsoon")
+void vectorCout(const std::vector<std::vector<int>> &v,
+                const std::string &v_name = "ejsoon")
 {
-    cout << v_name << ":" << endl;
+    std::cout << v_name << ":" << std::endl;
     for (size_t x = 0; x < v.size(); x++) {
-        cout << x << ": ";
-        for (size_t y = 0; y < v[x].size(); y++) {
-            cout << v[x][y] << ", ";
+        std::cout << x << ": ";
+        for (const auto &elem : v[x]) {
+            std::cout << elem << ", ";
         }
-        cout << endl;
+        std::cout << std::endl;
     }
 }
 
-void boardCout(int (&v)[12])
+void boardCout(const int (&v)[12])
 {
-    for (int x = 0; x < 12; x++) {
-        cout << v[x] << ", ";
+    std::ostringstream oss;
+    for (const auto &elem : v) {
+        oss << elem << ", ";
     }
-    cout << endl;
+    std::cout << oss.str() << std::endl;
 }
 
-void vectorRemove(vector<int> &v, int i)
+void vectorRemove(std::vector<int> &v, int i)
 {
-    size_t vindex = find(v.begin(), v.end(), i) - v.begin();
-    if (vindex != v.size())
-        v.erase(v.begin() + vindex);
+    v.erase(std::remove(v.begin(), v.end(), i), v.end());
 }
 
-int vectorIndexOf(vector<int> v, int i)
+int vectorIndexOf(const std::vector<int> &v, int i)
 {
-    size_t vindex = find(v.begin(), v.end(), i) - v.begin();
-    if (vindex == v.size())
+    auto iter = std::find(v.begin(), v.end(), i);
+    if (iter == v.end())
         return -1;
-    return vindex;
+    return std::distance(v.begin(), iter);
 }
 
 int vectorIndexOf(int (&v)[12], char i)
@@ -114,11 +116,11 @@ vector<int> getRunPos(int (&board)[12], int c)
     return running;
 }
 
-vector<int> vectorMerge(vector<int> hand, vector<int> free)
+std::vector<int> vectorMerge(std::vector<int> hand, std::vector<int> free)
 {
-    vector<int> make_free = {};
-    make_free.insert(make_free.end(), hand.begin(), hand.end());
-    make_free.insert(make_free.end(), free.begin(), free.end());
+    std::vector<int> make_free(std::move(hand));
+    make_free.insert(make_free.end(), std::make_move_iterator(free.begin()),
+                     std::make_move_iterator(free.end()));
     return make_free;
 }
 
