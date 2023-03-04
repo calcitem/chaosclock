@@ -135,24 +135,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="chaosclock.cpp" />
-    <ClCompile Include="evaluate.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="misc.cpp" />
-    <ClCompile Include="movegen.cpp" />
-    <ClCompile Include="movepick.cpp" />
-    <ClCompile Include="position.cpp" />
-    <ClCompile Include="search.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="config.h" />
-    <ClInclude Include="evaluate.h" />
-    <ClInclude Include="misc.h" />
-    <ClInclude Include="movegen.h" />
-    <ClInclude Include="movepick.h" />
-    <ClInclude Include="position.h" />
-    <ClInclude Include="search.h" />
-    <ClInclude Include="stack.h" />
-    <ClInclude Include="types.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="ccpos.txt" />

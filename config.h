@@ -21,14 +21,6 @@
 #pragma execution_character_set("utf-8")
 #endif
 
-//#define BRUTE_FORCE_ALGORITHM
-
-//#define RANDOM_POSITION
-
-//#define SORT_MOVEGEN_RESULT
-
-#define USE_POSITION_STACK
-
-#define BOTH_LOSE_THRESHOLD 50
+#define BRUTE_FORCE_ALGORITHM
 
 #endif // INCLUDE_CONFIG_H_

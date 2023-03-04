@@ -15,57 +15,12 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="position.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="evaluate.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="movegen.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="movepick.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="search.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="misc.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="chaosclock.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="position.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="evaluate.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="movegen.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="movepick.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="search.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="stack.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="types.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="config.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="misc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
