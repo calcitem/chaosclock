@@ -1,11 +1,11 @@
 #include <algorithm> // find()
+#include <chrono>
 #include <fstream>
 #include <iostream>
 #include <iterator> // begin(), end()
+#include <sstream>
 #include <string>
 #include <vector>
-#include <chrono>
-#include <sstream>
 
 #include "config.h"
 
@@ -197,7 +197,7 @@ Pieces piecesValue(Position pos)
                 if (vectorIndexOf(new_pieces.stock[p], ms) > -1 &&
                     (ms_pos + 1 == c ||
                      (vectorIndexOf(new_pieces.stock[p], ts) > -1 &&
-                         ts_pos + 1 == c))) {
+                      ts_pos + 1 == c))) {
                     stock_delete.emplace_back(x);
                     new_pieces.dead[p].emplace_back(c);
                 }
@@ -270,21 +270,21 @@ vector<Position> sortChildren(Position pos, vector<Position> children)
         int me = pos.player;
         int you = 1 - pos.player;
         int my_good_value = children[i].pieces_data.stick[me].size() +
-                          children[i].pieces_data.hand[me].size() +
-                          children[i].pieces_data.free[me].size() -
-                          pos.pieces_data.stick[me].size() +
-                          pos.pieces_data.hand[me].size() +
-                          pos.pieces_data.free[me].size();
+                            children[i].pieces_data.hand[me].size() +
+                            children[i].pieces_data.free[me].size() -
+                            pos.pieces_data.stick[me].size() +
+                            pos.pieces_data.hand[me].size() +
+                            pos.pieces_data.free[me].size();
         int my_death_value = children[i].pieces_data.dead[me].size() -
-                           pos.pieces_data.dead[me].size();
+                             pos.pieces_data.dead[me].size();
         int your_good_value = children[i].pieces_data.stick[you].size() +
-                            children[i].pieces_data.hand[you].size() +
-                            children[i].pieces_data.free[you].size() -
-                            pos.pieces_data.stick[you].size() -
-                            pos.pieces_data.hand[you].size() -
-                            pos.pieces_data.free[you].size();
+                              children[i].pieces_data.hand[you].size() +
+                              children[i].pieces_data.free[you].size() -
+                              pos.pieces_data.stick[you].size() -
+                              pos.pieces_data.hand[you].size() -
+                              pos.pieces_data.free[you].size();
         int your_death_value = children[i].pieces_data.dead[you].size() -
-                             pos.pieces_data.dead[you].size();
+                               pos.pieces_data.dead[you].size();
         if (my_death_value == 0 && your_death_value > 0) {
             first.emplace_back(children[i]);
         } else if (my_good_value - your_good_value > 0) {
@@ -322,14 +322,14 @@ int ifEnd(Position pos)
     if ((my_num == 6 && your_num < 6) ||
         (my_num + my_handle == 6 && your_dead > 0) ||
         (my_num + my_handle == 6 && your_num + your_handle <= 6 &&
-            my_num - your_num > 0)) {
+         my_num - your_num > 0)) {
         return 4;
     }
     // I lose
     if ((my_num < 5 && your_num == 6) ||
         (your_num + your_handle == 6 && my_dead > 0) ||
         (my_num + my_handle <= 6 && your_num + your_handle == 6 &&
-            your_num - my_num > 1)) {
+         your_num - my_num > 1)) {
         return 1;
     }
     // two lose
@@ -392,13 +392,17 @@ Position roll(Position pos)
         for (size_t sa = 0; sa < _children.size(); sa++) {
             pos.children.emplace_back(roll(_children[sa]));
             if ((pos.children[sa].value == 1 &&
-                    pos.children[sa].player != pos.player) ||
+                 pos.children[sa].player != pos.player) ||
                 (pos.children[sa].value == 4 &&
-                    pos.children[sa].player == pos.player)) {
+                 pos.children[sa].player == pos.player)) {
                 break;
             }
         }
-        if (move.size() == 0) {
+        if (move.size() == 0 ||
+            children.size() == 1 &&
+                pos.pieces_data.dead[1 - pos.player].size() -
+                        children[0].pieces_data.dead[1 - pos.player].size() >
+                    0) {
             if (pos.last_move == 0) {
                 pos.value = 2;
                 pos.children.clear();
@@ -457,7 +461,6 @@ int main()
         cout << "value:" << new_pos.value << endl;
         cout << "available move:" << new_pos.children.size() << endl;
 
-        
         start_time = std::chrono::high_resolution_clock::now();
 
         for (size_t lm = 0; lm < new_pos.children.size(); lm++) {
@@ -469,8 +472,7 @@ int main()
         end_time = std::chrono::high_resolution_clock::now();
         duration = std::chrono::duration_cast<std::chrono::milliseconds>(
             end_time - start_time);
-        std::cout << "Stage 2 took " << duration.count()
-                  << " ms" << std::endl;
+        std::cout << "Stage 2 took " << duration.count() << " ms" << std::endl;
 
         cin >> pick_child;
         if (pick_child != "-3") {
