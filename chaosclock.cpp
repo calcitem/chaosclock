@@ -35,13 +35,23 @@ struct Position
     Pieces pieces_data;
     int depth;
     int sub_value;
-    vector<Position *> children;
+    Position **children;
+    int child_count;
+    int child_capacity;
+
+    Position()
+    {
+        children = nullptr;
+        child_count = 0;
+        child_capacity = 0;
+    }
 
     ~Position()
     {
-        for (Position *child : children) {
-            delete child;
+        for (int i = 0; i < child_count; i++) {
+            delete children[i];
         }
+        free(children);
     }
 };
 
@@ -318,10 +328,10 @@ int result_sum = 0;
 Position *roll(Position *pos)
 {
     pos->value = ifEnd(*pos);
-    for (Position *child : pos->children) {
-        delete child;
+    for (int i = 0; i < pos->child_count; i++) {
+        delete pos->children[i];
     }
-    pos->children.clear();
+    pos->child_count = 0;
     roll_sum++;
     max_depth = max(pos->depth, max_depth);
     if (pos->depth > 30 || roll_sum > 1.2e7) {
@@ -338,35 +348,38 @@ Position *roll(Position *pos)
         vectorRemove(move, pos->last_move);
         if (1 == pos->player)
             vectorRemove(move, 12);
-        vector<Position *> children;
         for (size_t y = 0; y < move.size(); y++) {
-            Position *new_pos = new Position(*pos);
-            int c = move[y];
-            new_pos->depth = pos->depth + 1;
-            new_pos->last_move = c;
+            Position *new_pos = new Position();
+            memcpy(new_pos->board, pos->board, sizeof(pos->board));
+            new_pos->last_move = move[y];
             new_pos->player = 1 - pos->player;
+            new_pos->depth = pos->depth + 1;
             if (y < move.size() - pos->pieces_data.hand[pos->player].size()) {
-                int x = vectorIndexOf(new_pos->board, c);
+                int x = vectorIndexOf(new_pos->board, new_pos->last_move);
                 new_pos->board[x] = 0;
-                if (c != 12) {
-                    new_pos->board[(x + c) % 12] = c;
+                if (new_pos->last_move != 12) {
+                    new_pos->board[(x + new_pos->last_move) % 12] =
+                        new_pos->last_move;
                 }
                 new_pos->pieces_data = piecesValue(*new_pos);
-                children.emplace_back(new_pos);
             } else {
-                new_pos->board[c - 1] = c;
-                int onum = pos->board[c - 1];
+                new_pos->board[new_pos->last_move - 1] = new_pos->last_move;
+                int onum = pos->board[new_pos->last_move - 1];
                 if (onum > 0 && onum % 2 != pos->player) {
                     new_pos->player = pos->player;
                 }
                 new_pos->pieces_data = piecesValue(*new_pos);
-                children.emplace_back(new_pos);
             }
+            if (pos->child_count >= pos->child_capacity) {
+                pos->child_capacity += 10;
+                pos->children = (Position **)realloc(
+                    pos->children, pos->child_capacity * sizeof(Position *));
+            }
+            pos->children[pos->child_count++] = new_pos;
         }
         // vector<Position *> _children = sortChildren(pos, children);
-        for (size_t sa = 0; sa < children.size(); sa++) {
-            Position *child = roll(children[sa]);
-            pos->children.emplace_back(child);
+        for (int sa = 0; sa < pos->child_count; sa++) {
+            Position *child = roll(pos->children[sa]);
             if ((pos->children[sa]->value == 1 &&
                  pos->children[sa]->player != pos->player) ||
                 (pos->children[sa]->value == 4 &&
@@ -375,30 +388,33 @@ Position *roll(Position *pos)
             }
         }
         if (move.size() == 0 ||
-            children.size() == 1 &&
+            pos->child_count == 1 &&
                 pos->pieces_data.dead[1 - pos->player].size() -
-                        children[0]->pieces_data.dead[1 - pos->player].size() >
+                        pos->children[0]
+                            ->pieces_data.dead[1 - pos->player]
+                            .size() >
                     0) {
             if (pos->last_move == 0) {
                 pos->value = 2;
-                for (Position *child : pos->children) {
-                    delete child;
+                for (int i = 0; i < pos->child_count; i++) {
+                    delete pos->children[i];
                 }
-                pos->children.clear();
+                pos->child_count = 0;
             } else {
-                Position *pass_pos = new Position(*pos);
-                pass_pos->depth = pos->depth + 1;
+                Position *pass_pos = new Position();
+                memcpy(pass_pos->board, pos->board, sizeof(pos->board));
                 pass_pos->last_move = 0;
                 pass_pos->player = 1 - pos->player;
-                pos->children.emplace_back(roll(pass_pos));
+                pass_pos->depth = pos->depth + 1;
+                pos->children[pos->child_count++] = roll(pass_pos);
             }
         }
         // value
         int max_value = pos->value;
-        for (Position *child : pos->children) {
-            int this_value = child->value;
+        for (int i = 0; i < pos->child_count; i++) {
+            int this_value = pos->children[i]->value;
             if ((this_value == 4 || this_value == 1) &&
-                child->player != pos->player) {
+                pos->children[i]->player != pos->player) {
                 this_value = (this_value == 4 ? 1 : 4);
             }
             if (max_value < this_value) {
@@ -438,11 +454,11 @@ int main()
         cout << "depth:" << new_pos->depth << endl;
         cout << "player: " << new_pos->player << endl;
         cout << "value:" << new_pos->value << endl;
-        cout << "available move:" << new_pos->children.size() << endl;
+        cout << "available move:" << new_pos->child_count << endl;
 
         start_time = std::chrono::high_resolution_clock::now();
 
-        for (size_t lm = 0; lm < new_pos->children.size(); lm++) {
+        for (int lm = 0; lm < new_pos->child_count; lm++) {
             cout << "  " << lm << ": " << new_pos->children[lm]->last_move;
             cout << " (value: " << new_pos->children[lm]->value << ") ";
             cout << endl;
