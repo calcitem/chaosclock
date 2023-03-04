@@ -302,41 +302,47 @@ vector<Position> sortChildren(Position pos, vector<Position> children)
     return sorted_children;
 }
 
-int ifEnd(Position pos)
+int ifEnd(const Position &pos)
 {
-    int me = pos.player;
-    int you = 1 - me;
-    Pieces pd = pos.pieces_data;
-    int my_num = pd.stick[me].size();
-    int your_num = pd.stick[you].size();
-    int my_handle = pd.hand[me].size() + pd.free[me].size();
-    int your_handle = pd.hand[you].size() + pd.free[you].size();
-    int my_dead = pd.dead[me].size();
-    int your_dead = pd.dead[you].size();
+    const int me = pos.player;
+    const int you = 1 - me;
+    const Pieces pd = pos.pieces_data;
+
+    const int my_num = pd.stick[me].size();
+    const int your_num = pd.stick[you].size();
+    const int my_handle = pd.hand[me].size() + pd.free[me].size();
+    const int your_handle = pd.hand[you].size() + pd.free[you].size();
+    const int my_dead = pd.dead[me].size();
+    const int your_dead = pd.dead[you].size();
+
     // two win
-    if (my_num + my_handle == 6 && your_num + your_handle == 6 &&
-        my_num - your_num <= 0 && my_num - your_num >= -1) {
-        return 3;
-    }
+    const bool two_win = my_num + my_handle == 6 &&
+                         your_num + your_handle == 6 &&
+                         (my_num - your_num <= 0 && my_num - your_num >= -1);
     // I win
-    if ((my_num == 6 && your_num < 6) ||
-        (my_num + my_handle == 6 && your_dead > 0) ||
-        (my_num + my_handle == 6 && your_num + your_handle <= 6 &&
-         my_num - your_num > 0)) {
-        return 4;
-    }
+    const bool i_win = (my_num == 6 && your_num < 6) ||
+                       (my_num + my_handle == 6 && your_dead > 0) ||
+                       (my_num + my_handle == 6 &&
+                        your_num + your_handle <= 6 && my_num - your_num > 0);
     // I lose
-    if ((my_num < 5 && your_num == 6) ||
-        (your_num + your_handle == 6 && my_dead > 0) ||
-        (my_num + my_handle <= 6 && your_num + your_handle == 6 &&
-         your_num - my_num > 1)) {
-        return 1;
-    }
+    const bool i_lose = (my_num < 5 && your_num == 6) ||
+                        (your_num + your_handle == 6 && my_dead > 0) ||
+                        (my_num + my_handle <= 6 &&
+                         your_num + your_handle == 6 && your_num - my_num > 1);
     // two lose
-    if (my_dead > 0 && your_dead > 0) {
+    const bool two_lose = my_dead > 0 && your_dead > 0;
+
+    if (two_win) {
+        return 3;
+    } else if (i_win) {
+        return 4;
+    } else if (i_lose) {
+        return 1;
+    } else if (two_lose) {
         return 2;
+    } else {
+        return 0;
     }
-    return 0;
 }
 
 int roll_sum = 0;
