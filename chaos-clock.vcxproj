@@ -143,7 +143,6 @@
     <Text Include="ccpos.txt" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="chaosclock.cfg" />
     <None Include="README.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

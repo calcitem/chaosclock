@@ -13,7 +13,7 @@
 
 using namespace std;
 
-struct pieces
+struct Pieces
 {
     vector<vector<int>> stick = {{}, {}};
     vector<vector<int>> hand = {{}, {}};
@@ -24,16 +24,16 @@ struct pieces
     vector<vector<int>> free = {{}, {}};
 };
 
-struct position
+struct Position
 {
     int board[12];
-    int lastmove;
+    int last_move;
     int player;
     int value;
-    pieces pieces_data;
-    int deep;
+    Pieces pieces_data;
+    int depth;
     int sub_value;
-    vector<position> children;
+    vector<Position> children;
 };
 
 void vectorCout(vector<int> &v, string v_name = "ejsoon")
@@ -115,15 +115,15 @@ vector<int> getRunPos(int (&board)[12], int c)
 
 vector<int> vectorMerge(vector<int> hand, vector<int> free)
 {
-    vector<int> makefree = {};
-    makefree.insert(makefree.end(), hand.begin(), hand.end());
-    makefree.insert(makefree.end(), free.begin(), free.end());
-    return makefree;
+    vector<int> make_free = {};
+    make_free.insert(make_free.end(), hand.begin(), hand.end());
+    make_free.insert(make_free.end(), free.begin(), free.end());
+    return make_free;
 }
 
-pieces piecesValue(position pos)
+Pieces piecesValue(Position pos)
 {
-    pieces new_pieces;
+    Pieces new_pieces;
     vector<int> run_pos_sum = {};
     for (int c = 1; c <= 12; c++) {
         // stick, hand, run, stop
@@ -215,9 +215,9 @@ pos_start:
         1,2,0,4,0,6,7,3,9,10,12,11;1
         1,2,0,4,0,6,7,3,9,10,12,11
  */
-position getValue(string pos_start)
+Position getValue(string pos_start)
 {
-    position new_position;
+    Position new_position;
     size_t pos_find, last_pos_find, substr_len;
     vector<size_t> pos_split;
     string pos_string;
@@ -230,15 +230,15 @@ position getValue(string pos_start)
     if (pos_split.size() == 2) {
         pos_string = pos_start.substr(0, pos_split[0]);
         new_position.player = stoi(pos_start.substr(pos_split[0] + 1, 1));
-        new_position.lastmove = stoi(pos_start.substr(pos_split[1] + 1));
+        new_position.last_move = stoi(pos_start.substr(pos_split[1] + 1));
     } else if (pos_split.size() == 1) {
         pos_string = pos_start.substr(0, pos_split[0]);
         new_position.player = stoi(pos_start.substr(pos_split[0] + 1));
-        new_position.lastmove = -1;
+        new_position.last_move = -1;
     } else {
         pos_string = pos_start;
         new_position.player = 0;
-        new_position.lastmove = -1;
+        new_position.last_move = -1;
     }
     pos_find = 0;
     int pos_p = 0;
@@ -254,56 +254,56 @@ position getValue(string pos_start)
     new_position
         .board[sizeof(new_position.board) / sizeof(new_position.board[0]) - 1] =
         stoi(pos_start.substr(pos_find));
-    new_position.deep = 0;
+    new_position.depth = 0;
     return new_position;
 }
 
-vector<position> sortChildren(position pos, vector<position> children)
+vector<Position> sortChildren(Position pos, vector<Position> children)
 {
-    vector<position> first;
-    vector<position> normal;
-    vector<position> bad;
+    vector<Position> first;
+    vector<Position> normal;
+    vector<Position> bad;
     for (size_t i = 0; i < children.size(); i++) {
         int me = pos.player;
         int you = 1 - pos.player;
-        int myGoodValue = children[i].pieces_data.stick[me].size() +
+        int my_good_value = children[i].pieces_data.stick[me].size() +
                           children[i].pieces_data.hand[me].size() +
                           children[i].pieces_data.free[me].size() -
                           pos.pieces_data.stick[me].size() +
                           pos.pieces_data.hand[me].size() +
                           pos.pieces_data.free[me].size();
-        int myDeathValue = children[i].pieces_data.dead[me].size() -
+        int my_death_value = children[i].pieces_data.dead[me].size() -
                            pos.pieces_data.dead[me].size();
-        int yourGoodValue = children[i].pieces_data.stick[you].size() +
+        int your_good_value = children[i].pieces_data.stick[you].size() +
                             children[i].pieces_data.hand[you].size() +
                             children[i].pieces_data.free[you].size() -
                             pos.pieces_data.stick[you].size() -
                             pos.pieces_data.hand[you].size() -
                             pos.pieces_data.free[you].size();
-        int yourDeathValue = children[i].pieces_data.dead[you].size() -
+        int your_death_value = children[i].pieces_data.dead[you].size() -
                              pos.pieces_data.dead[you].size();
-        if (myDeathValue == 0 && yourDeathValue > 0) {
+        if (my_death_value == 0 && your_death_value > 0) {
             first.push_back(children[i]);
-        } else if (myGoodValue - yourGoodValue > 0) {
+        } else if (my_good_value - your_good_value > 0) {
             first.push_back(children[i]);
-        } else if (myGoodValue - yourGoodValue < 0) {
+        } else if (my_good_value - your_good_value < 0) {
             bad.push_back(children[i]);
         } else {
             normal.push_back(children[i]);
         }
     }
-    vector<position> sorted_children;
+    vector<Position> sorted_children;
     sorted_children.insert(sorted_children.end(), first.begin(), first.end());
     sorted_children.insert(sorted_children.end(), normal.begin(), normal.end());
     sorted_children.insert(sorted_children.end(), bad.begin(), bad.end());
     return sorted_children;
 }
 
-int ifEnd(position pos)
+int ifEnd(Position pos)
 {
     int me = pos.player;
     int you = 1 - me;
-    pieces pd = pos.pieces_data;
+    Pieces pd = pos.pieces_data;
     int my_num = pd.stick[me].size();
     int your_num = pd.stick[you].size();
     int my_handle = pd.hand[me].size() + pd.free[me].size();
@@ -336,17 +336,17 @@ int ifEnd(position pos)
     return 0;
 }
 
-int rollsum = 0;
-int maxdeep = 0;
+int roll_sum = 0;
+int max_depth = 0;
 int result_sum = 0;
 
-position roll(position pos)
+Position roll(Position pos)
 {
     pos.value = ifEnd(pos);
     pos.children.clear();
-    rollsum++;
-    maxdeep = max(pos.deep, maxdeep);
-    if (pos.deep > 24 || rollsum > 1.2e5) {
+    roll_sum++;
+    max_depth = max(pos.depth, max_depth);
+    if (pos.depth > 24 || roll_sum > 1.2e5) {
         return pos;
     }
     // children
@@ -357,15 +357,15 @@ position roll(position pos)
         vector<int> move = vectorMerge(pos.pieces_data.running,
                                        pos.pieces_data.hand[pos.player]);
         // remove lastmove and (12 if player == 1)
-        vectorRemove(move, pos.lastmove);
+        vectorRemove(move, pos.last_move);
         if (1 == pos.player)
             vectorRemove(move, 12);
-        vector<position> children;
+        vector<Position> children;
         for (size_t y = 0; y < move.size(); y++) {
-            position new_pos = pos;
+            Position new_pos = pos;
             int c = move[y];
-            new_pos.deep = pos.deep + 1;
-            new_pos.lastmove = c;
+            new_pos.depth = pos.depth + 1;
+            new_pos.last_move = c;
             new_pos.player = 1 - pos.player;
             if (y < move.size() - pos.pieces_data.hand[pos.player].size()) {
                 int x = vectorIndexOf(new_pos.board, c);
@@ -385,7 +385,7 @@ position roll(position pos)
                 children.push_back(new_pos);
             }
         }
-        vector<position> _children = sortChildren(pos, children);
+        vector<Position> _children = sortChildren(pos, children);
         for (size_t sa = 0; sa < _children.size(); sa++) {
             pos.children.push_back(roll(_children[sa]));
             if (pos.children[sa].value == 1 &&
@@ -396,13 +396,13 @@ position roll(position pos)
             }
         }
         if (move.size() == 0) {
-            if (pos.lastmove == 0) {
+            if (pos.last_move == 0) {
                 pos.value = 2;
                 pos.children.clear();
             } else {
-                position pass_pos = pos;
-                pass_pos.deep = pos.deep + 1;
-                pass_pos.lastmove = 0;
+                Position pass_pos = pos;
+                pass_pos.depth = pos.depth + 1;
+                pass_pos.last_move = 0;
                 pass_pos.player = 1 - pos.player;
                 pos.children.push_back(roll(pass_pos));
             }
@@ -424,41 +424,37 @@ position roll(position pos)
     return pos;
 }
 
-#ifdef BRUTE_FORCE_ALGORITHM
 int main()
-#else
-int tmain()
-#endif
 {
     // read position
     string pos_start;
-    fstream MyFile("ccpos.txt");
-    getline(MyFile, pos_start);
-    MyFile.close();
-    position pos = getValue(pos_start);
+    fstream my_file("ccpos.txt");
+    getline(my_file, pos_start);
+    my_file.close();
+    Position pos = getValue(pos_start);
     vector<int> pos_board;
     pos.pieces_data = piecesValue(pos);
-    position new_pos = roll(pos);
+    Position new_pos = roll(pos);
     string pick_child;
-    cout << "rollsum:" << rollsum << endl;
-    cout << "maxdeep:" << maxdeep << endl;
+    cout << "roll_sum:" << roll_sum << endl;
+    cout << "max_depth:" << max_depth << endl;
     cout << "result_sum:" << result_sum << endl;
     cout << endl;
     do {
         cout << "board: ";
         boardCout(new_pos.board);
-        cout << "deep:" << new_pos.deep << endl;
+        cout << "depth:" << new_pos.depth << endl;
         cout << "player: " << new_pos.player << endl;
         cout << "value:" << new_pos.value << endl;
         cout << "available move:" << new_pos.children.size() << endl;
         for (size_t lm = 0; lm < new_pos.children.size(); lm++) {
-            cout << "  " << lm << ": " << new_pos.children[lm].lastmove;
+            cout << "  " << lm << ": " << new_pos.children[lm].last_move;
             cout << " (value: " << new_pos.children[lm].value << ") ";
             cout << endl;
         }
         cin >> pick_child;
         if (pick_child != "-3") {
-            position new_pos_child = new_pos.children[stoi(pick_child)];
+            Position new_pos_child = new_pos.children[stoi(pick_child)];
             new_pos = new_pos_child;
         }
     } while (pick_child != "-3");
