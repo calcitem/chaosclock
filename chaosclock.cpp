@@ -427,6 +427,7 @@ Position roll(Position pos)
 
 int main()
 {
+    auto start_time = std::chrono::high_resolution_clock::now();
     // read position
     string pos_start;
     fstream my_file("ccpos.txt");
@@ -441,6 +442,11 @@ int main()
     cout << "max_depth:" << max_depth << endl;
     cout << "result_sum:" << result_sum << endl;
     cout << endl;
+    auto end_time = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(
+        end_time - start_time);
+    std::cout << "Stage 1 took " << duration.count() << " ms" << std::endl;
+
     do {
         cout << "board: ";
         boardCout(new_pos.board);
@@ -449,7 +455,8 @@ int main()
         cout << "value:" << new_pos.value << endl;
         cout << "available move:" << new_pos.children.size() << endl;
 
-        auto start_time = std::chrono::high_resolution_clock::now();
+        
+        start_time = std::chrono::high_resolution_clock::now();
 
         for (size_t lm = 0; lm < new_pos.children.size(); lm++) {
             cout << "  " << lm << ": " << new_pos.children[lm].last_move;
@@ -457,10 +464,10 @@ int main()
             cout << endl;
         }
 
-        auto end_time = std::chrono::high_resolution_clock::now();
-        auto duration = std::chrono::duration_cast<std::chrono::microseconds>(
+        end_time = std::chrono::high_resolution_clock::now();
+        duration = std::chrono::duration_cast<std::chrono::milliseconds>(
             end_time - start_time);
-        std::cout << "Took " << duration.count()
+        std::cout << "Stage 2 took " << duration.count()
                   << " ms" << std::endl;
 
         cin >> pick_child;
