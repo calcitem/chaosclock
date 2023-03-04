@@ -4,6 +4,7 @@
 #include <iterator> // begin(), end()
 #include <string>
 #include <vector>
+#include <chrono>
 
 #include "config.h"
 
@@ -447,11 +448,21 @@ int main()
         cout << "player: " << new_pos.player << endl;
         cout << "value:" << new_pos.value << endl;
         cout << "available move:" << new_pos.children.size() << endl;
+
+        auto start_time = std::chrono::high_resolution_clock::now();
+
         for (size_t lm = 0; lm < new_pos.children.size(); lm++) {
             cout << "  " << lm << ": " << new_pos.children[lm].last_move;
             cout << " (value: " << new_pos.children[lm].value << ") ";
             cout << endl;
         }
+
+        auto end_time = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::microseconds>(
+            end_time - start_time);
+        std::cout << "Took " << duration.count()
+                  << " ms" << std::endl;
+
         cin >> pick_child;
         if (pick_child != "-3") {
             Position new_pos_child = new_pos.children[stoi(pick_child)];
