@@ -1,4 +1,31 @@
-# List of authors for ChaosClock
+# List of authors for Sanmill, as of Dec 29, 2022
 
-Ejsoon (ejsoon)
+# Founders of the Sanmill project
 Calcitem (calcitem)
+
+# All other authors of the code in alphabetical order
+Christian Weiske (cweiske)
+Diego (sguinetti)
+Jintao Yang (Joker2770)
+Nikolas Rimikis (Leptopoda)
+Xu Shiwei (xshiwei)
+
+# Some of the code has been adapted and modified on the basis of Stockfish, NineChess and ChessRoad etc.
+
+# Authors of Stockfish
+Tord Romstad (romstad)
+Marco Costalba (mcostalba)
+Joona Kiiski (zamar)
+Gary Linscott (glinscott)
+
+# Authors of NineChess
+Liu Wei (liuweilhy)
+
+# Authors of ChessRoad
+He Zhaoyun (hezhaoyun)
+
+# Authors of PerfectAI
+Thomas Weber
+
+# Authors of hash map
+Kaushik Basu (kshk123)

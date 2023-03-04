@@ -412,7 +412,7 @@ shortKnotValue.dat
 settings.ini
 
 # Executable files
-src/choasclock
+src/sanmill
 
 # Sourcetrail files
 *.srctrl*
@@ -440,7 +440,3 @@ flutter_export_environment.sh
 
 # Snapcraft
 *.snap
-
-# Other
-JSON/
-/*.stackdump
