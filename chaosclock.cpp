@@ -261,47 +261,6 @@ Position getValue(string pos_start)
     return new_position;
 }
 
-vector<Position> sortChildren(Position pos, vector<Position> children)
-{
-    vector<Position> first;
-    vector<Position> normal;
-    vector<Position> bad;
-    for (size_t i = 0; i < children.size(); i++) {
-        int me = pos.player;
-        int you = 1 - pos.player;
-        int my_good_value = children[i].pieces_data.stick[me].size() +
-                            children[i].pieces_data.hand[me].size() +
-                            children[i].pieces_data.free[me].size() -
-                            pos.pieces_data.stick[me].size() +
-                            pos.pieces_data.hand[me].size() +
-                            pos.pieces_data.free[me].size();
-        int my_death_value = children[i].pieces_data.dead[me].size() -
-                             pos.pieces_data.dead[me].size();
-        int your_good_value = children[i].pieces_data.stick[you].size() +
-                              children[i].pieces_data.hand[you].size() +
-                              children[i].pieces_data.free[you].size() -
-                              pos.pieces_data.stick[you].size() -
-                              pos.pieces_data.hand[you].size() -
-                              pos.pieces_data.free[you].size();
-        int your_death_value = children[i].pieces_data.dead[you].size() -
-                               pos.pieces_data.dead[you].size();
-        if (my_death_value == 0 && your_death_value > 0) {
-            first.emplace_back(children[i]);
-        } else if (my_good_value - your_good_value > 0) {
-            first.emplace_back(children[i]);
-        } else if (my_good_value - your_good_value < 0) {
-            bad.emplace_back(children[i]);
-        } else {
-            normal.emplace_back(children[i]);
-        }
-    }
-    vector<Position> sorted_children;
-    sorted_children.insert(sorted_children.end(), first.begin(), first.end());
-    sorted_children.insert(sorted_children.end(), normal.begin(), normal.end());
-    sorted_children.insert(sorted_children.end(), bad.begin(), bad.end());
-    return sorted_children;
-}
-
 int ifEnd(const Position &pos)
 {
     const int me = pos.player;
