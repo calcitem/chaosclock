@@ -131,7 +131,7 @@ std::vector<int> vectorMerge(std::vector<int> hand, std::vector<int> free)
     return make_free;
 }
 
-Pieces piecesValue(Position pos)
+Pieces piecesValue(Position &pos)
 {
     Pieces new_pieces;
     vector<int> run_pos_sum = {};
