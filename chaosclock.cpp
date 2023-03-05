@@ -64,8 +64,7 @@ inline int mod12(int x)
     return x;
 }
 
-void vectorCout(const std::vector<int8_t> &v, const std::string &v_name = "ejso"
-                                                                          "on")
+void vectorCout(const std::vector<int8_t> &v, const std::string &v_name = "ejsoon")
 {
     std::ostringstream oss;
     oss << v_name << ": ";
