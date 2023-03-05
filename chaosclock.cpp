@@ -17,24 +17,24 @@ using namespace std;
 
 struct Pieces
 {
-    vector<vector<int>> stick = {{}, {}};
-    vector<vector<int>> hand = {{}, {}};
-    vector<int> running = {};
-    vector<vector<int>> stop = {{}, {}};
-    vector<vector<int>> stock = {{}, {}};
-    vector<vector<int>> dead = {{}, {}};
-    vector<vector<int>> free = {{}, {}};
+    vector<vector<int8_t>> stick = {{}, {}};
+    vector<vector<int8_t>> hand = {{}, {}};
+    vector<int8_t> running = {};
+    vector<vector<int8_t>> stop = {{}, {}};
+    vector<vector<int8_t>> stock = {{}, {}};
+    vector<vector<int8_t>> dead = {{}, {}};
+    vector<vector<int8_t>> free = {{}, {}};
 };
 
 struct Position
 {
-    int board[12];
-    int last_move;
-    int player;
-    int value;
+    int8_t board[12];
+    int8_t last_move;
+    int8_t player;
+    int8_t value;
     Pieces pieces_data;
-    int depth;
-    int sub_value;
+    int8_t depth;
+    int8_t sub_value;
     vector<Position *> children;
 
     ~Position()
@@ -45,17 +45,18 @@ struct Position
     }
 };
 
-void vectorCout(const std::vector<int> &v, const std::string &v_name = "ejsoon")
+void vectorCout(const std::vector<int8_t> &v, const std::string &v_name = "ejso"
+                                                                          "on")
 {
     std::ostringstream oss;
     oss << v_name << ": ";
     for (const auto &elem : v) {
-        oss << elem << ", ";
+        oss << (int)elem << ", ";
     }
     std::cout << oss.str() << std::endl;
 }
 
-void vectorCout(const std::vector<std::vector<int>> &v,
+void vectorCout(const std::vector<std::vector<int8_t>> &v,
                 const std::string &v_name = "ejsoon")
 {
     std::cout << v_name << ":" << std::endl;
@@ -68,21 +69,21 @@ void vectorCout(const std::vector<std::vector<int>> &v,
     }
 }
 
-void boardCout(const int (&v)[12])
+void boardCout(const int8_t (&v)[12])
 {
     std::ostringstream oss;
     for (const auto &elem : v) {
-        oss << elem << ", ";
+        oss << (int)elem << ", ";
     }
     std::cout << oss.str() << std::endl;
 }
 
-void vectorRemove(std::vector<int> &v, int i)
+void vectorRemove(std::vector<int8_t> &v, int i)
 {
     v.erase(std::remove(v.begin(), v.end(), i), v.end());
 }
 
-int vectorIndexOf(const std::vector<int> &v, int i)
+int vectorIndexOf(const std::vector<int8_t> &v, int i)
 {
     auto iter = std::find(v.begin(), v.end(), i);
     if (iter == v.end())
@@ -90,7 +91,7 @@ int vectorIndexOf(const std::vector<int> &v, int i)
     return std::distance(v.begin(), iter);
 }
 
-int vectorIndexOf(int (&v)[12], char i)
+int vectorIndexOf(int8_t (&v)[12], int8_t i)
 {
     int vindex = find(v, v + 12, i) - v;
     if (vindex == 12)
@@ -106,9 +107,9 @@ int vectorIndexOf(int (&v)[12], int i)
     return vindex;
 }
 
-vector<int> getRunPos(int (&board)[12], int c)
+vector<int8_t> getRunPos(int8_t (&board)[12], int8_t c)
 {
-    vector<int> running;
+    vector<int8_t> running;
     int c_pos = vectorIndexOf(board, c);
     int next_pos = (c_pos + c) % 12;
     while (board[next_pos] != next_pos + 1) {
@@ -123,9 +124,10 @@ vector<int> getRunPos(int (&board)[12], int c)
     return running;
 }
 
-std::vector<int> vectorMerge(std::vector<int> hand, std::vector<int> free)
+std::vector<int8_t> vectorMerge(std::vector<int8_t> hand,
+                                std::vector<int8_t> free)
 {
-    std::vector<int> make_free(std::move(hand));
+    std::vector<int8_t> make_free(std::move(hand));
     make_free.insert(make_free.end(), std::make_move_iterator(free.begin()),
                      std::make_move_iterator(free.end()));
     return make_free;
@@ -134,7 +136,7 @@ std::vector<int> vectorMerge(std::vector<int> hand, std::vector<int> free)
 Pieces piecesValue(Position &pos)
 {
     Pieces new_pieces;
-    vector<int> run_pos_sum = {};
+    vector<int8_t> run_pos_sum = {};
     for (int c = 1; c <= 12; c++) {
         // stick, hand, run, stop
         if (c == pos.board[c - 1]) {
@@ -142,7 +144,7 @@ Pieces piecesValue(Position &pos)
         } else if (vectorIndexOf(pos.board, c) == -1) {
             new_pieces.hand[c % 2].emplace_back(c);
         } else {
-            vector<int> c_run_pos = getRunPos(pos.board, c);
+            vector<int8_t> c_run_pos = getRunPos(pos.board, c);
             if (c_run_pos.size() == 0) {
                 new_pieces.stop[c % 2].emplace_back(c);
             } else {
@@ -154,11 +156,11 @@ Pieces piecesValue(Position &pos)
     }
     // free
     for (size_t p = 0; p < new_pieces.stop.size(); p++) {
-        vector<int> makefree = vectorMerge(new_pieces.hand[p],
+        vector<int8_t> makefree = vectorMerge(new_pieces.hand[p],
                                            new_pieces.free[p]);
         for (size_t x = 0; x < new_pieces.stop[p].size(); x++) {
             int stopx = new_pieces.stop[p][x];
-            int stop_pos = vectorIndexOf(pos.board, stopx);
+            int8_t stop_pos = vectorIndexOf(pos.board, stopx);
             if (vectorIndexOf(makefree, stop_pos + 1) > -1) {
                 new_pieces.free[p].emplace_back(stopx);
                 new_pieces.stop[p].erase(new_pieces.stop[p].begin() + x);
@@ -169,7 +171,7 @@ Pieces piecesValue(Position &pos)
     }
     // stock
     for (size_t p = 0; p < new_pieces.stop.size(); p++) {
-        vector<int> stop_delete;
+        vector<int8_t> stop_delete;
         for (size_t x = 0; x < new_pieces.stop[p].size(); x++) {
             int c = new_pieces.stop[p][x];
             int c_pos = vectorIndexOf(pos.board, c);
@@ -186,7 +188,7 @@ Pieces piecesValue(Position &pos)
     }
     // dead
     for (size_t p = 0; p < new_pieces.stock.size(); p++) {
-        vector<int> stock_delete;
+        vector<int8_t> stock_delete;
         for (size_t x = 0; x < new_pieces.stock[p].size(); x++) {
             int c = new_pieces.stock[p][x];
             size_t c_pos = vectorIndexOf(pos.board, c);
@@ -323,7 +325,7 @@ Position *roll(Position *pos)
     }
     pos->children.clear();
     roll_sum++;
-    max_depth = max(pos->depth, max_depth);
+    max_depth = max((int)pos->depth, max_depth);
     if (pos->depth > 30 || roll_sum > 1.2e7) {
         return pos;
     }
@@ -332,7 +334,7 @@ Position *roll(Position *pos)
         result_sum++;
         // appendResult(pos);
     } else {
-        vector<int> move = vectorMerge(pos->pieces_data.running,
+        vector<int8_t> move = vectorMerge(pos->pieces_data.running,
                                        pos->pieces_data.hand[pos->player]);
         // remove lastmove and (12 if player == 1)
         vectorRemove(move, pos->last_move);
@@ -419,7 +421,7 @@ int main()
     getline(my_file, pos_start);
     my_file.close();
     Position pos = getValue(pos_start);
-    vector<int> pos_board;
+    vector<int8_t> pos_board;
     pos.pieces_data = piecesValue(pos);
     Position *new_pos = roll(&pos);
     string pick_child;
@@ -435,16 +437,16 @@ int main()
     do {
         cout << "board: ";
         boardCout(new_pos->board);
-        cout << "depth:" << new_pos->depth << endl;
-        cout << "player: " << new_pos->player << endl;
-        cout << "value:" << new_pos->value << endl;
+        cout << "depth:" << (int)new_pos->depth << endl;
+        cout << "player: " << (int)new_pos->player << endl;
+        cout << "value:" << (int)new_pos->value << endl;
         cout << "available move:" << new_pos->children.size() << endl;
 
         start_time = std::chrono::high_resolution_clock::now();
 
         for (size_t lm = 0; lm < new_pos->children.size(); lm++) {
-            cout << "  " << lm << ": " << new_pos->children[lm]->last_move;
-            cout << " (value: " << new_pos->children[lm]->value << ") ";
+            cout << "  " << lm << ": " << (int)new_pos->children[lm]->last_move;
+            cout << " (value: " << (int)new_pos->children[lm]->value << ") ";
             cout << endl;
         }
 
