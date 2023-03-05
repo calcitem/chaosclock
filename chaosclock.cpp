@@ -57,6 +57,13 @@ std::array<char, 1024 * 1024 * 768> buffer;
 std::pmr::monotonic_buffer_resource pool {buffer.data(), buffer.size()};
 std::pmr::polymorphic_allocator<Position> alloc {&pool};
 
+inline int mod12(int x)
+{
+    if (x > 12)
+        x -= 12;
+    return x;
+}
+
 void vectorCout(const std::vector<int8_t> &v, const std::string &v_name = "ejso"
                                                                           "on")
 {
@@ -123,7 +130,7 @@ vector<int8_t> getRunPos(int8_t (&board)[12], int8_t c)
 {
     vector<int8_t> running;
     int c_pos = vectorIndexOf(board, c);
-    int next_pos = (c_pos + c) % 12;
+    int next_pos = mod12(c_pos + c);
     while (board[next_pos] != next_pos + 1) {
         if (next_pos == c_pos || c == next_pos + 1) {
             running.emplace_back(next_pos);
@@ -131,7 +138,7 @@ vector<int8_t> getRunPos(int8_t (&board)[12], int8_t c)
         } else {
             running.emplace_back(next_pos);
         }
-        next_pos = (next_pos + c) % 12;
+        next_pos = mod12(next_pos + c);
     }
     return running;
 }
@@ -152,13 +159,13 @@ Pieces piecesValue(Position &pos)
     for (int c = 1; c <= 12; c++) {
         // stick, hand, run, stop
         if (c == pos.board[c - 1]) {
-            new_pieces.stick[c % 2].emplace_back(c);
+            new_pieces.stick[c & 1].emplace_back(c);
         } else if (vectorIndexOf(pos.board, c) == -1) {
-            new_pieces.hand[c % 2].emplace_back(c);
+            new_pieces.hand[c & 1].emplace_back(c);
         } else {
             vector<int8_t> c_run_pos = getRunPos(pos.board, c);
             if (c_run_pos.size() == 0) {
-                new_pieces.stop[c % 2].emplace_back(c);
+                new_pieces.stop[c & 1].emplace_back(c);
             } else {
                 new_pieces.running.emplace_back(c);
                 run_pos_sum.insert(run_pos_sum.end(), c_run_pos.begin(),
@@ -205,7 +212,7 @@ Pieces piecesValue(Position &pos)
             int c = new_pieces.stock[p][x];
             size_t c_pos = vectorIndexOf(pos.board, c);
             // if in other player
-            if (c_pos % 2 == p) {
+            if ((c_pos & 1) == p) {
                 stock_delete.emplace_back(x);
                 new_pieces.dead[p].emplace_back(c);
             }
@@ -371,14 +378,14 @@ Position *roll(Position *pos)
                     int x = vectorIndexOf(new_pos->board, c);
                     new_pos->board[x] = 0;
                     if (c != 12) {
-                        new_pos->board[(x + c) % 12] = c;
+                        new_pos->board[mod12(x + c)] = c;
                     }
                     new_pos->pieces_data = piecesValue(*new_pos);
                     children.emplace_back(new_pos);
                 } else {
                     new_pos->board[c - 1] = c;
                     int onum = p->board[c - 1];
-                    if (onum > 0 && onum % 2 != p->player) {
+                    if (onum > 0 && (onum & 1) != p->player) {
                         new_pos->player = p->player;
                     }
                     new_pos->pieces_data = piecesValue(*new_pos);
