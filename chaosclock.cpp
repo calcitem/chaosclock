@@ -24,13 +24,13 @@ extern std::pmr::polymorphic_allocator<Position> alloc;
 
 struct Pieces
 {
-    vector<vector<int8_t>> stick = {{}, {}}; // 24 Bytes
-    vector<vector<int8_t>> hand = {{}, {}};  // 24 Bytes
-    vector<int8_t> running = {};             // 24 Bytes
-    vector<vector<int8_t>> stop = {{}, {}};  // 24 Bytes
-    vector<vector<int8_t>> stock = {{}, {}}; // 24 Bytes
-    vector<vector<int8_t>> dead = {{}, {}};  // 24 Bytes
-    vector<vector<int8_t>> free = {{}, {}};  // 24 Bytes
+    vector<int8_t> stick[2] = {};
+    vector<int8_t> hand[2] = {};
+    vector<int8_t> running = {};
+    vector<int8_t> stop[2] = {};
+    vector<int8_t> stock[2] = {};
+    vector<int8_t> dead[2] = {};
+    vector<int8_t> free[2] = {};
 };
 
 struct Position
@@ -174,10 +174,10 @@ Pieces piecesValue(Position &pos)
         }
     }
     // free
-    for (size_t p = 0; p < new_pieces.stop.size(); p++) {
+    for (size_t p = 0; p < 2; p++) {
         vector<int8_t> makefree = vectorMerge(new_pieces.hand[p],
                                               new_pieces.free[p]);
-        for (size_t x = 0; x < new_pieces.stop[p].size(); x++) {
+        for (long x = 0; x < new_pieces.stop[p].size(); x++) {
             int stopx = new_pieces.stop[p][x];
             int8_t stop_pos = vectorIndexOf(pos.board, stopx);
             if (vectorIndexOf(makefree, stop_pos + 1) > -1) {
@@ -189,7 +189,7 @@ Pieces piecesValue(Position &pos)
         }
     }
     // stock
-    for (size_t p = 0; p < new_pieces.stop.size(); p++) {
+    for (size_t p = 0; p < 2; p++) {
         vector<int8_t> stop_delete;
         for (size_t x = 0; x < new_pieces.stop[p].size(); x++) {
             int c = new_pieces.stop[p][x];
@@ -206,7 +206,7 @@ Pieces piecesValue(Position &pos)
         }
     }
     // dead
-    for (size_t p = 0; p < new_pieces.stock.size(); p++) {
+    for (size_t p = 0; p < 2; p++) {
         vector<int8_t> stock_delete;
         for (size_t x = 0; x < new_pieces.stock[p].size(); x++) {
             int c = new_pieces.stock[p][x];
