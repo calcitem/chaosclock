@@ -274,7 +274,7 @@ int ifEnd(const Position &pos)
 {
     const int me = pos.player;
     const int you = 1 - me;
-    const Pieces pd = pos.pieces_data;
+    const Pieces &pd = pos.pieces_data;
 
     const int my_num = pd.stick[me].size();
     const int your_num = pd.stick[you].size();
