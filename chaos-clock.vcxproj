@@ -139,9 +139,6 @@
     <ClCompile Include="chaosclock.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="config.h" />
-  </ItemGroup>
-  <ItemGroup>
     <Text Include="ccpos.txt" />
   </ItemGroup>
   <ItemGroup>
