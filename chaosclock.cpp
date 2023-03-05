@@ -1,16 +1,17 @@
 #define _SILENCE_CXX17_POLYMORPHIC_ALLOCATOR_DESTROY_DEPRECATION_WARNING
 
 #include <algorithm> // find()
+#include <array>
 #include <chrono>
 #include <fstream>
 #include <iostream>
 #include <iterator> // begin(), end()
-#include <sstream>
-#include <string>
-#include <vector>
 #include <memory>
 #include <memory_resource>
-#include <array>
+#include <sstream>
+#include <stack>
+#include <string>
+#include <vector>
 
 #pragma warning(disable : 4189)
 #pragma warning(disable : 4267)
@@ -25,7 +26,7 @@ struct Pieces
 {
     vector<vector<int8_t>> stick = {{}, {}}; // 24 Bytes
     vector<vector<int8_t>> hand = {{}, {}};  // 24 Bytes
-    vector<int8_t> running = {};    // 24 Bytes
+    vector<int8_t> running = {};             // 24 Bytes
     vector<vector<int8_t>> stop = {{}, {}};  // 24 Bytes
     vector<vector<int8_t>> stock = {{}, {}}; // 24 Bytes
     vector<vector<int8_t>> dead = {{}, {}};  // 24 Bytes
@@ -34,14 +35,14 @@ struct Pieces
 
 struct Position
 {
-    int8_t board[12]; // 12 Bytes
-    int8_t last_move; // 1 Bytes
-    int8_t player;    // 1 Bytes
-    int8_t depth;     // 1 Bytes
-    int8_t value : 4;     // 0.5 Bytes
-    int8_t sub_value : 4; // 0.5 Bytes
+    int8_t board[12];            // 12 Bytes
+    int8_t last_move;            // 1 Bytes
+    int8_t player;               // 1 Bytes
+    int8_t depth;                // 1 Bytes
+    int8_t value : 4;            // 0.5 Bytes
+    int8_t sub_value : 4;        // 0.5 Bytes
     vector<Position *> children; // 24 Bytes
-    Pieces pieces_data; // 168 Bytes
+    Pieces pieces_data;          // 168 Bytes
 
     ~Position()
     {
@@ -168,7 +169,7 @@ Pieces piecesValue(Position &pos)
     // free
     for (size_t p = 0; p < new_pieces.stop.size(); p++) {
         vector<int8_t> makefree = vectorMerge(new_pieces.hand[p],
-                                           new_pieces.free[p]);
+                                              new_pieces.free[p]);
         for (size_t x = 0; x < new_pieces.stop[p].size(); x++) {
             int stopx = new_pieces.stop[p][x];
             int8_t stop_pos = vectorIndexOf(pos.board, stopx);
@@ -341,88 +342,95 @@ Position *roll(Position *pos)
     if (pos->depth > 30 || roll_sum > 1.2e7) {
         return pos;
     }
-    // children
-    if (pos->value > 0) {
-        result_sum++;
-        // appendResult(pos);
-    } else {
-        vector<int8_t> move = vectorMerge(pos->pieces_data.running,
-                                       pos->pieces_data.hand[pos->player]);
-        // remove lastmove and (12 if player == 1)
-        vectorRemove(move, pos->last_move);
-        if (1 == pos->player)
-            vectorRemove(move, 12);
-        vector<Position *> children;
-        for (size_t y = 0; y < move.size(); y++) {    
-            Position *new_pos = alloc.allocate(1);
-            alloc.construct(new_pos, *pos);
-            int c = move[y];
-            new_pos->depth = pos->depth + 1;
-            new_pos->last_move = c;
-            new_pos->player = 1 - pos->player;
-            if (y < move.size() - pos->pieces_data.hand[pos->player].size()) {
-                int x = vectorIndexOf(new_pos->board, c);
-                new_pos->board[x] = 0;
-                if (c != 12) {
-                    new_pos->board[(x + c) % 12] = c;
+    stack<Position *> positionStack;
+    positionStack.push(pos);
+    while (!positionStack.empty()) {
+        Position *p = positionStack.top();
+        positionStack.pop();
+        if (p->value > 0) {
+            result_sum++;
+            // appendResult(currentPosition);
+        } else {
+            vector<int8_t> move = vectorMerge(p->pieces_data.running,
+                                              p->pieces_data.hand[p->player]);
+            // remove lastmove and (12 if player == 1)
+            vectorRemove(move, p->last_move);
+            if (1 == p->player)
+                vectorRemove(move, 12);
+            vector<Position *> children;
+            for (size_t y = 0; y < move.size(); y++) {
+                Position *new_pos = alloc.allocate(1);
+                alloc.construct(new_pos, *p);
+                int c = move[y];
+                new_pos->depth = p->depth + 1;
+                new_pos->last_move = c;
+                new_pos->player = 1 - p->player;
+                if (y < move.size() - p->pieces_data.hand[p->player].size()) {
+                    int x = vectorIndexOf(new_pos->board, c);
+                    new_pos->board[x] = 0;
+                    if (c != 12) {
+                        new_pos->board[(x + c) % 12] = c;
+                    }
+                    new_pos->pieces_data = piecesValue(*new_pos);
+                    children.emplace_back(new_pos);
+                } else {
+                    new_pos->board[c - 1] = c;
+                    int onum = p->board[c - 1];
+                    if (onum > 0 && onum % 2 != p->player) {
+                        new_pos->player = p->player;
+                    }
+                    new_pos->pieces_data = piecesValue(*new_pos);
+                    children.emplace_back(new_pos);
                 }
-                new_pos->pieces_data = piecesValue(*new_pos);
-                children.emplace_back(new_pos);
-            } else {
-                new_pos->board[c - 1] = c;
-                int onum = pos->board[c - 1];
-                if (onum > 0 && onum % 2 != pos->player) {
-                    new_pos->player = pos->player;
+            }
+            // vector<Position *> _children = sortChildren(currentPosition,
+            // children);
+            for (size_t sa = 0; sa < children.size(); sa++) {
+                Position *child = roll(children[sa]);
+                p->children.emplace_back(child);
+                if ((p->children[sa]->value == 1 &&
+                     p->children[sa]->player != p->player) ||
+                    (p->children[sa]->value == 4 &&
+                     p->children[sa]->player == p->player)) {
+                    break;
                 }
-                new_pos->pieces_data = piecesValue(*new_pos);
-                children.emplace_back(new_pos);
+                positionStack.push(child);
             }
-        }
-        // vector<Position *> _children = sortChildren(pos, children);
-        for (size_t sa = 0; sa < children.size(); sa++) {
-            Position *child = roll(children[sa]);
-            pos->children.emplace_back(child);
-            if ((pos->children[sa]->value == 1 &&
-                 pos->children[sa]->player != pos->player) ||
-                (pos->children[sa]->value == 4 &&
-                 pos->children[sa]->player == pos->player)) {
-                break;
-            }
-        }
-        if (move.size() == 0 ||
-            children.size() == 1 &&
-                pos->pieces_data.dead[1 - pos->player].size() -
-                        children[0]->pieces_data.dead[1 - pos->player].size() >
-                    0) {
-            if (pos->last_move == 0) {
-                pos->value = 2;
-                for (Position *child : pos->children) {
-                    alloc.destroy(child);
-                    alloc.deallocate(child, 1);
+            if (move.size() == 0 ||
+                children.size() == 1 &&
+                    p->pieces_data.dead[1 - p->player].size() -
+                            children[0]->pieces_data.dead[1 - p->player].size() >
+                        0) {
+                if (p->last_move == 0) {
+                    p->value = 2;
+                    for (Position *child : p->children) {
+                        alloc.destroy(child);
+                        alloc.deallocate(child, 1);
+                    }
+                    p->children.clear();
+                } else {
+                    Position *pass_pos = alloc.allocate(1);
+                    alloc.construct(pass_pos, *p);
+                    pass_pos->depth = p->depth + 1;
+                    pass_pos->last_move = 0;
+                    pass_pos->player = 1 - p->player;
+                    p->children.emplace_back(roll(pass_pos));
                 }
-                pos->children.clear();
-            } else {
-                Position *pass_pos = alloc.allocate(1);
-                alloc.construct(pass_pos, *pos);
-                pass_pos->depth = pos->depth + 1;
-                pass_pos->last_move = 0;
-                pass_pos->player = 1 - pos->player;
-                pos->children.emplace_back(roll(pass_pos));
             }
+            // value
+            int max_value = p->value;
+            for (Position *child : p->children) {
+                int this_value = child->value;
+                if ((this_value == 4 || this_value == 1) &&
+                    child->player != p->player) {
+                    this_value = (this_value == 4 ? 1 : 4);
+                }
+                if (max_value < this_value) {
+                    max_value = this_value;
+                }
+            }
+            p->value = max_value;
         }
-        // value
-        int max_value = pos->value;
-        for (Position *child : pos->children) {
-            int this_value = child->value;
-            if ((this_value == 4 || this_value == 1) &&
-                child->player != pos->player) {
-                this_value = (this_value == 4 ? 1 : 4);
-            }
-            if (max_value < this_value) {
-                max_value = this_value;
-            }
-        }
-        pos->value = max_value;
     }
     return pos;
 }
