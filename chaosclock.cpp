@@ -241,7 +241,7 @@ pos_start:
  */
 Position getValue(string pos_start)
 {
-    Position new_position;
+    Position *new_position = alloc.allocate(1);
     size_t pos_find, last_pos_find, substr_len;
     vector<size_t> pos_split;
     string pos_string;
@@ -253,16 +253,16 @@ Position getValue(string pos_start)
     }
     if (pos_split.size() == 2) {
         pos_string = pos_start.substr(0, pos_split[0]);
-        new_position.player = stoi(pos_start.substr(pos_split[0] + 1, 1));
-        new_position.last_move = stoi(pos_start.substr(pos_split[1] + 1));
+        new_position->player = stoi(pos_start.substr(pos_split[0] + 1, 1));
+        new_position->last_move = stoi(pos_start.substr(pos_split[1] + 1));
     } else if (pos_split.size() == 1) {
         pos_string = pos_start.substr(0, pos_split[0]);
-        new_position.player = stoi(pos_start.substr(pos_split[0] + 1));
-        new_position.last_move = -1;
+        new_position->player = stoi(pos_start.substr(pos_split[0] + 1));
+        new_position->last_move = -1;
     } else {
         pos_string = pos_start;
-        new_position.player = 0;
-        new_position.last_move = -1;
+        new_position->player = 0;
+        new_position->last_move = -1;
     }
     pos_find = 0;
     int pos_p = 0;
@@ -270,16 +270,18 @@ Position getValue(string pos_start)
         last_pos_find = pos_find;
         pos_find = pos_start.find(',', pos_find);
         substr_len = pos_find - last_pos_find;
-        new_position.board[pos_p] = stoi(
+        new_position->board[pos_p] = stoi(
             pos_start.substr(last_pos_find, substr_len));
         pos_find++;
         pos_p++;
     }
     new_position
-        .board[sizeof(new_position.board) / sizeof(new_position.board[0]) - 1] =
-        stoi(pos_start.substr(pos_find));
-    new_position.depth = 0;
-    return new_position;
+        ->board[sizeof(new_position->board) / sizeof(new_position->board[0]) -
+                1] = stoi(pos_start.substr(pos_find));
+    new_position->depth = 0;
+    Position result = *new_position;
+    alloc.deallocate(new_position, 1);
+    return result;
 }
 
 int ifEnd(const Position &pos)
