@@ -17,25 +17,25 @@ using namespace std;
 
 struct Pieces
 {
-    vector<vector<int8_t>> stick = {{}, {}};
-    vector<vector<int8_t>> hand = {{}, {}};
-    vector<int8_t> running = {};
-    vector<vector<int8_t>> stop = {{}, {}};
-    vector<vector<int8_t>> stock = {{}, {}};
-    vector<vector<int8_t>> dead = {{}, {}};
-    vector<vector<int8_t>> free = {{}, {}};
+    vector<vector<int8_t>> stick = {{}, {}}; // 24 Bytes
+    vector<vector<int8_t>> hand = {{}, {}};  // 24 Bytes
+    vector<int8_t> running = {};    // 24 Bytes
+    vector<vector<int8_t>> stop = {{}, {}};  // 24 Bytes
+    vector<vector<int8_t>> stock = {{}, {}}; // 24 Bytes
+    vector<vector<int8_t>> dead = {{}, {}};  // 24 Bytes
+    vector<vector<int8_t>> free = {{}, {}};  // 24 Bytes
 };
 
 struct Position
 {
-    int8_t board[12];
-    int8_t last_move;
-    int8_t player;
-    int8_t value;
-    Pieces pieces_data;
-    int8_t depth;
-    int8_t sub_value;
-    vector<Position *> children;
+    int8_t board[12]; // 12 Bytes
+    int8_t last_move; // 1 Bytes
+    int8_t player;    // 1 Bytes
+    int8_t depth;     // 1 Bytes
+    int8_t value : 4;     // 0.5 Bytes
+    int8_t sub_value : 4; // 0.5 Bytes
+    vector<Position *> children; // 24 Bytes
+    Pieces pieces_data; // 168 Bytes
 
     ~Position()
     {
