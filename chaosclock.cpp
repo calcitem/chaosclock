@@ -109,7 +109,7 @@ int vectorIndexOf(const std::vector<int8_t> &v, int i)
     return std::distance(v.begin(), iter);
 }
 
-int vectorIndexOf(int8_t (&v)[12], int8_t i)
+int vectorIndexOf(const int8_t (&v)[12], int8_t i)
 {
     int vindex = find(v, v + 12, i) - v;
     if (vindex == 12)
@@ -117,7 +117,7 @@ int vectorIndexOf(int8_t (&v)[12], int8_t i)
     return vindex;
 }
 
-int vectorIndexOf(int (&v)[12], int i)
+int vectorIndexOf(const int (&v)[12], int i)
 {
     size_t vindex = find(v, v + 12, i) - v;
     if (vindex == 12)
@@ -125,7 +125,7 @@ int vectorIndexOf(int (&v)[12], int i)
     return vindex;
 }
 
-vector<int8_t> getRunPos(int8_t (&board)[12], int8_t c)
+vector<int8_t> getRunPos(const int8_t (&board)[12], int8_t c)
 {
     vector<int8_t> running;
     int c_pos = vectorIndexOf(board, c);
@@ -142,8 +142,8 @@ vector<int8_t> getRunPos(int8_t (&board)[12], int8_t c)
     return running;
 }
 
-std::vector<int8_t> vectorMerge(std::vector<int8_t> hand,
-                                std::vector<int8_t> free)
+std::vector<int8_t> vectorMerge(const std::vector<int8_t> &hand,
+                                const std::vector<int8_t> &free)
 {
     std::vector<int8_t> make_free(std::move(hand));
     make_free.insert(make_free.end(), std::make_move_iterator(free.begin()),
@@ -151,7 +151,7 @@ std::vector<int8_t> vectorMerge(std::vector<int8_t> hand,
     return make_free;
 }
 
-Pieces piecesValue(Position &pos)
+Pieces piecesValue(const Position &pos)
 {
     Pieces new_pieces;
     vector<int8_t> run_pos_sum = {};
@@ -245,7 +245,7 @@ pos_start:
         1,2,0,4,0,6,7,3,9,10,12,11;1
         1,2,0,4,0,6,7,3,9,10,12,11
  */
-Position getValue(string pos_start)
+Position getValue(const string &pos_start)
 {
     Position *new_position = alloc.allocate(1);
     size_t pos_find, last_pos_find, substr_len;
