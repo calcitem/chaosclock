@@ -59,7 +59,7 @@ std::pmr::polymorphic_allocator<Position> alloc {&pool};
 
 inline int mod12(int x)
 {
-    if (x > 12)
+    if (x >= 12)
         x -= 12;
     return x;
 }
