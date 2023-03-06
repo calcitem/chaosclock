@@ -1,13 +1,9 @@
-#define _SILENCE_CXX17_POLYMORPHIC_ALLOCATOR_DESTROY_DEPRECATION_WARNING
-
 #include <algorithm> // find()
 #include <array>
 #include <chrono>
 #include <fstream>
 #include <iostream>
 #include <iterator> // begin(), end()
-#include <memory>
-#include <memory_resource>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -17,9 +13,6 @@
 #pragma warning(disable : 4244)
 
 using namespace std;
-
-struct Position;
-extern std::pmr::polymorphic_allocator<Position> alloc;
 
 struct Pieces
 {
@@ -46,15 +39,10 @@ struct Position
     ~Position()
     {
         for (Position *child : children) {
-            alloc.destroy(child);
-            alloc.deallocate(child, 1);
+            delete child;
         }
     }
 };
-
-std::array<char, 1024 * 1024 * 768> buffer;
-std::pmr::monotonic_buffer_resource pool {buffer.data(), buffer.size()};
-std::pmr::polymorphic_allocator<Position> alloc {&pool};
 
 inline int mod12(int x)
 {
@@ -338,8 +326,7 @@ Position *roll(Position *pos)
 {
     pos->value = ifEnd(*pos);
     for (Position *child : pos->children) {
-        alloc.destroy(child);
-        alloc.deallocate(child, 1);
+        delete child;
     }
     pos->children.clear();
     roll_sum++;
@@ -360,8 +347,7 @@ Position *roll(Position *pos)
             vectorRemove(move, 12);
         vector<Position *> children;
         for (size_t y = 0; y < move.size(); y++) {
-            Position *new_pos = alloc.allocate(1);
-            alloc.construct(new_pos, *pos);
+            Position *new_pos = new Position(*pos);
             int c = move[y];
             new_pos->depth = pos->depth + 1;
             new_pos->last_move = c;
@@ -403,13 +389,11 @@ Position *roll(Position *pos)
             if (pos->last_move == 0) {
                 pos->value = 2;
                 for (Position *child : pos->children) {
-                    alloc.destroy(child);
-                    alloc.deallocate(child, 1);
+                    delete child;
                 }
                 pos->children.clear();
             } else {
-                Position *pass_pos = alloc.allocate(1);
-                alloc.construct(pass_pos, *pos);
+                Position *pass_pos = new Position(*pos);
                 pass_pos->depth = pos->depth + 1;
                 pass_pos->last_move = 0;
                 pass_pos->player = 1 - pos->player;
@@ -484,8 +468,7 @@ int main()
     } while (pick_child != "-3");
 
     // deallocate memory
-    alloc.destroy(new_pos);
-    alloc.deallocate(new_pos, 1);
+    delete new_pos;
 
     return 0;
 }
