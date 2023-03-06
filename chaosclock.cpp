@@ -14,6 +14,15 @@
 
 using namespace std;
 
+enum GameResult
+{
+    NONE = 0,
+    LOSE = 1,
+    BOTH_LOSE = 2,
+    BOTH_WIN = 3,
+    WIN = 4,
+};
+
 struct Pieces
 {
     vector<int8_t> stick[2] = {};
@@ -289,30 +298,30 @@ int ifEnd(const Position &pos)
     const int your_dead = pd.dead[you].size();
 
     // two win
-    const bool two_win = my_num + my_handle == 6 &&
-                         your_num + your_handle == 6 &&
-                         (my_num - your_num <= 0 && my_num - your_num >= -1);
+    const bool both_win = my_num + my_handle == 6 &&
+                          your_num + your_handle == 6 &&
+                          (my_num - your_num <= 0 && my_num - your_num >= -1);
     // I win
-    const bool i_win = (my_num == 6 && your_num < 6) ||
-                       (my_num + my_handle == 6 && your_dead > 0) ||
-                       (my_num + my_handle == 6 &&
-                        your_num + your_handle <= 6 && my_num - your_num > 0);
+    const bool win = (my_num == 6 && your_num < 6) ||
+                     (my_num + my_handle == 6 && your_dead > 0) ||
+                     (my_num + my_handle == 6 && your_num + your_handle <= 6 &&
+                      my_num - your_num > 0);
     // I lose
-    const bool i_lose = (my_num < 5 && your_num == 6) ||
-                        (your_num + your_handle == 6 && my_dead > 0) ||
-                        (my_num + my_handle <= 6 &&
-                         your_num + your_handle == 6 && your_num - my_num > 1);
+    const bool lose = (my_num < 5 && your_num == 6) ||
+                      (your_num + your_handle == 6 && my_dead > 0) ||
+                      (my_num + my_handle <= 6 && your_num + your_handle == 6 &&
+                       your_num - my_num > 1);
     // two lose
-    const bool two_lose = my_dead > 0 && your_dead > 0;
+    const bool both_lose = my_dead > 0 && your_dead > 0;
 
-    if (two_win) {
-        return 3;
-    } else if (i_win) {
-        return 4;
-    } else if (i_lose) {
-        return 1;
-    } else if (two_lose) {
-        return 2;
+    if (both_win) {
+        return BOTH_WIN;
+    } else if (win) {
+        return WIN;
+    } else if (lose) {
+        return LOSE;
+    } else if (both_lose) {
+        return BOTH_LOSE;
     } else {
         return 0;
     }
