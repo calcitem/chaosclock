@@ -34,7 +34,7 @@ BINDIR = $(PREFIX)/bin
 PGOBENCH = ./$(EXE) bench
 
 ### Source and object files
-SRCS = chaosclock.cpp
+SRCS = evaluate.cpp misc.cpp position.cpp main.cpp piece.cpp search.cpp
 
 OBJS = $(notdir $(SRCS:.cpp=.o))
 
