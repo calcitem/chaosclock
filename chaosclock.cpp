@@ -9,7 +9,6 @@
 #include <memory>
 #include <memory_resource>
 #include <sstream>
-#include <stack>
 #include <string>
 #include <vector>
 
@@ -142,8 +141,8 @@ vector<int8_t> getRunPos(const int8_t (&board)[12], int8_t c)
     return running;
 }
 
-std::vector<int8_t> vectorMerge(const std::vector<int8_t> &hand,
-                                const std::vector<int8_t> &free)
+std::vector<int8_t> vectorMerge(const std::vector<int8_t> hand,
+                                const std::vector<int8_t> free)
 {
     std::vector<int8_t> make_free(std::move(hand));
     make_free.insert(make_free.end(), std::make_move_iterator(free.begin()),
@@ -247,7 +246,7 @@ pos_start:
  */
 Position getValue(const string &pos_start)
 {
-    Position *new_position = alloc.allocate(1);
+    Position new_position;
     size_t pos_find, last_pos_find, substr_len;
     vector<size_t> pos_split;
     string pos_string;
@@ -259,16 +258,16 @@ Position getValue(const string &pos_start)
     }
     if (pos_split.size() == 2) {
         pos_string = pos_start.substr(0, pos_split[0]);
-        new_position->player = stoi(pos_start.substr(pos_split[0] + 1, 1));
-        new_position->last_move = stoi(pos_start.substr(pos_split[1] + 1));
+        new_position.player = stoi(pos_start.substr(pos_split[0] + 1, 1));
+        new_position.last_move = stoi(pos_start.substr(pos_split[1] + 1));
     } else if (pos_split.size() == 1) {
         pos_string = pos_start.substr(0, pos_split[0]);
-        new_position->player = stoi(pos_start.substr(pos_split[0] + 1));
-        new_position->last_move = -1;
+        new_position.player = stoi(pos_start.substr(pos_split[0] + 1));
+        new_position.last_move = -1;
     } else {
         pos_string = pos_start;
-        new_position->player = 0;
-        new_position->last_move = -1;
+        new_position.player = 0;
+        new_position.last_move = -1;
     }
     pos_find = 0;
     int pos_p = 0;
@@ -276,18 +275,16 @@ Position getValue(const string &pos_start)
         last_pos_find = pos_find;
         pos_find = pos_start.find(',', pos_find);
         substr_len = pos_find - last_pos_find;
-        new_position->board[pos_p] = stoi(
+        new_position.board[pos_p] = stoi(
             pos_start.substr(last_pos_find, substr_len));
         pos_find++;
         pos_p++;
     }
     new_position
-        ->board[sizeof(new_position->board) / sizeof(new_position->board[0]) -
-                1] = stoi(pos_start.substr(pos_find));
-    new_position->depth = 0;
-    Position result = *new_position;
-    alloc.deallocate(new_position, 1);
-    return result;
+        .board[sizeof(new_position.board) / sizeof(new_position.board[0]) - 1] =
+        stoi(pos_start.substr(pos_find));
+    new_position.depth = 0;
+    return new_position;
 }
 
 int ifEnd(const Position &pos)
@@ -350,95 +347,88 @@ Position *roll(Position *pos)
     if (pos->depth > 30 || roll_sum > 1.2e7) {
         return pos;
     }
-    stack<Position *> positionStack;
-    positionStack.push(pos);
-    while (!positionStack.empty()) {
-        Position *p = positionStack.top();
-        positionStack.pop();
-        if (p->value > 0) {
-            result_sum++;
-            // appendResult(currentPosition);
-        } else {
-            vector<int8_t> move = vectorMerge(p->pieces_data.running,
-                                              p->pieces_data.hand[p->player]);
-            // remove lastmove and (12 if player == 1)
-            vectorRemove(move, p->last_move);
-            if (1 == p->player)
-                vectorRemove(move, 12);
-            vector<Position *> children;
-            for (size_t y = 0; y < move.size(); y++) {
-                Position *new_pos = alloc.allocate(1);
-                alloc.construct(new_pos, *p);
-                int c = move[y];
-                new_pos->depth = p->depth + 1;
-                new_pos->last_move = c;
-                new_pos->player = 1 - p->player;
-                if (y < move.size() - p->pieces_data.hand[p->player].size()) {
-                    int x = vectorIndexOf(new_pos->board, c);
-                    new_pos->board[x] = 0;
-                    if (c != 12) {
-                        new_pos->board[mod12(x + c)] = c;
-                    }
-                    new_pos->pieces_data = piecesValue(*new_pos);
-                    children.emplace_back(new_pos);
-                } else {
-                    new_pos->board[c - 1] = c;
-                    int onum = p->board[c - 1];
-                    if (onum > 0 && (onum & 1) != p->player) {
-                        new_pos->player = p->player;
-                    }
-                    new_pos->pieces_data = piecesValue(*new_pos);
-                    children.emplace_back(new_pos);
+    // children
+    if (pos->value > 0) {
+        result_sum++;
+        // appendResult(pos);
+    } else {
+        vector<int8_t> move = vectorMerge(pos->pieces_data.running,
+                                          pos->pieces_data.hand[pos->player]);
+        // remove lastmove and (12 if player == 1)
+        vectorRemove(move, pos->last_move);
+        if (1 == pos->player)
+            vectorRemove(move, 12);
+        vector<Position *> children;
+        for (size_t y = 0; y < move.size(); y++) {
+            Position *new_pos = alloc.allocate(1);
+            alloc.construct(new_pos, *pos);
+            int c = move[y];
+            new_pos->depth = pos->depth + 1;
+            new_pos->last_move = c;
+            new_pos->player = 1 - pos->player;
+            if (y < move.size() - pos->pieces_data.hand[pos->player].size()) {
+                int x = vectorIndexOf(new_pos->board, c);
+                new_pos->board[x] = 0;
+                if (c != 12) {
+                    new_pos->board[(x + c) % 12] = c;
                 }
+                new_pos->pieces_data = piecesValue(*new_pos);
+                children.emplace_back(new_pos);
+            } else {
+                new_pos->board[c - 1] = c;
+                int onum = pos->board[c - 1];
+                if (onum > 0 && (onum & 1) != pos->player) {
+                    new_pos->player = pos->player;
+                }
+                new_pos->pieces_data = piecesValue(*new_pos);
+                children.emplace_back(new_pos);
             }
-            // vector<Position *> _children = sortChildren(currentPosition,
-            // children);
-            for (size_t sa = 0; sa < children.size(); sa++) {
-                Position *child = roll(children[sa]);
-                p->children.emplace_back(child);
-                if ((p->children[sa]->value == 1 &&
-                     p->children[sa]->player != p->player) ||
-                    (p->children[sa]->value == 4 &&
-                     p->children[sa]->player == p->player)) {
-                    break;
-                }
-                positionStack.push(child);
-            }
-            if (move.size() == 0 ||
-                children.size() == 1 &&
-                    p->pieces_data.dead[1 - p->player].size() -
-                            children[0]->pieces_data.dead[1 - p->player].size() >
-                        0) {
-                if (p->last_move == 0) {
-                    p->value = 2;
-                    for (Position *child : p->children) {
-                        alloc.destroy(child);
-                        alloc.deallocate(child, 1);
-                    }
-                    p->children.clear();
-                } else {
-                    Position *pass_pos = alloc.allocate(1);
-                    alloc.construct(pass_pos, *p);
-                    pass_pos->depth = p->depth + 1;
-                    pass_pos->last_move = 0;
-                    pass_pos->player = 1 - p->player;
-                    p->children.emplace_back(roll(pass_pos));
-                }
-            }
-            // value
-            int max_value = p->value;
-            for (Position *child : p->children) {
-                int this_value = child->value;
-                if ((this_value == 4 || this_value == 1) &&
-                    child->player != p->player) {
-                    this_value = (this_value == 4 ? 1 : 4);
-                }
-                if (max_value < this_value) {
-                    max_value = this_value;
-                }
-            }
-            p->value = max_value;
         }
+        // vector<Position *> _children = sortChildren(pos, children);
+        for (size_t sa = 0; sa < children.size(); sa++) {
+            Position *child = roll(children[sa]);
+            pos->children.emplace_back(child);
+            if ((pos->children[sa]->value == 1 &&
+                 pos->children[sa]->player != pos->player) ||
+                (pos->children[sa]->value == 4 &&
+                 pos->children[sa]->player == pos->player)) {
+                break;
+            }
+        }
+        if (move.size() == 0 ||
+            children.size() == 1 &&
+                pos->pieces_data.dead[1 - pos->player].size() -
+                        children[0]->pieces_data.dead[1 - pos->player].size() >
+                    0) {
+            if (pos->last_move == 0) {
+                pos->value = 2;
+                for (Position *child : pos->children) {
+                    alloc.destroy(child);
+                    alloc.deallocate(child, 1);
+                }
+                pos->children.clear();
+            } else {
+                Position *pass_pos = alloc.allocate(1);
+                alloc.construct(pass_pos, *pos);
+                pass_pos->depth = pos->depth + 1;
+                pass_pos->last_move = 0;
+                pass_pos->player = 1 - pos->player;
+                pos->children.emplace_back(roll(pass_pos));
+            }
+        }
+        // value
+        int max_value = pos->value;
+        for (Position *child : pos->children) {
+            int this_value = child->value;
+            if ((this_value == 4 || this_value == 1) &&
+                child->player != pos->player) {
+                this_value = (this_value == 4 ? 1 : 4);
+            }
+            if (max_value < this_value) {
+                max_value = this_value;
+            }
+        }
+        pos->value = max_value;
     }
     return pos;
 }
