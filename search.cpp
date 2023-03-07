@@ -50,7 +50,7 @@ Position *search(Position *pos)
                 int x = vectorIndexOf(new_pos->board, c);
                 new_pos->board[x] = 0;
                 if (c != 12) {
-                    new_pos->board[(x + c) % 12] = c;
+                    new_pos->board[mod12(x + c)] = c;
                 }
                 new_pos->pieces_data = piecesValue(*new_pos);
                 children.emplace_back(new_pos);
