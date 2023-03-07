@@ -1,10 +1,17 @@
+#include "misc.h"
 #include "piece.h"
 #include "position.h"
 #include "types.h"
-#include "misc.h"
+
+#include <algorithm> // find(), remove()
+#include <array>
+#include <iostream>
+#include <sstream>
+#include <vector>
 
 using namespace std;
 
+// Function to ensure a number is between 0 and 11 by wrapping it around
 int mod12(int x)
 {
     if (x >= 12)
@@ -12,74 +19,78 @@ int mod12(int x)
     return x;
 }
 
-void vectorCout(const std::vector<int8_t> &v,
-                       const std::string &v_name = "ejso"
-                                                   "on")
+// Function to print a vector of integers
+void vectorCout(const vector<int8_t> &v, const string &v_name = "ejsooon")
 {
-    std::ostringstream oss;
+    ostringstream oss;
     oss << v_name << ": ";
     for (const auto &elem : v) {
         oss << (int)elem << ", ";
     }
-    std::cout << oss.str() << std::endl;
+    cout << oss.str() << endl;
 }
 
-void vectorCout(const std::vector<std::vector<int8_t>> &v,
-                       const std::string &v_name = "ejsoon")
+// Function to print a vector of integers
+void vectorCout(const vector<vector<int8_t>> &v, const string &v_name = "ejsoo"
+                                                                        "n")
 {
-    std::cout << v_name << ":" << std::endl;
+    cout << v_name << ":" << endl;
     for (size_t x = 0; x < v.size(); x++) {
-        std::cout << x << ": ";
+        cout << x << ": ";
         for (const auto &elem : v[x]) {
-            std::cout << elem << ", ";
+            cout << elem << ", ";
         }
-        std::cout << std::endl;
+        cout << endl;
     }
 }
 
+// Function to print a fixed-size array of integers
 void boardCout(const int8_t (&v)[12])
 {
-    std::ostringstream oss;
+    ostringstream oss;
     for (const auto &elem : v) {
         oss << (int)elem << ", ";
     }
-    std::cout << oss.str() << std::endl;
+    cout << oss.str() << endl;
 }
 
-void vectorRemove(std::vector<int8_t> &v, int i)
+// Function to remove an element from a vector
+void vectorRemove(vector<int8_t> &v, int i)
 {
-    v.erase(std::remove(v.begin(), v.end(), i), v.end());
+    v.erase(remove(v.begin(), v.end(), i), v.end());
 }
 
-int vectorIndexOf(const std::vector<int8_t> &v, int i)
+// Function to find the index of an element in a vector
+int vectorIndexOf(const vector<int8_t> &v, int i)
 {
-    auto iter = std::find(v.begin(), v.end(), i);
+    auto iter = find(v.begin(), v.end(), i);
     if (iter == v.end())
         return -1;
-    return std::distance(v.begin(), iter);
+    return distance(v.begin(), iter);
 }
 
+// Function to find the index of an element in a fixed-size array
 int vectorIndexOf(const int8_t (&v)[12], int8_t i)
 {
-    int vindex = find(v, v + 12, i) - v;
-    if (vindex == 12)
+    auto iter = find(begin(v), end(v), i);
+    if (iter == end(v))
         return -1;
-    return vindex;
+    return distance(begin(v), iter);
 }
 
+// Function to find the index of an element in a fixed-size array
 int vectorIndexOf(const int (&v)[12], int i)
 {
-    size_t vindex = find(v, v + 12, i) - v;
-    if (vindex == 12)
+    auto iter = find(begin(v), end(v), i);
+    if (iter == end(v))
         return -1;
-    return vindex;
+    return distance(begin(v), iter);
 }
 
-std::vector<int8_t> vectorMerge(const std::vector<int8_t> hand,
-                                       const std::vector<int8_t> free)
+// Function to merge two vectors
+vector<int8_t> vectorMerge(const vector<int8_t> hand, const vector<int8_t> free)
 {
-    std::vector<int8_t> make_free(std::move(hand));
-    make_free.insert(make_free.end(), std::make_move_iterator(free.begin()),
-                     std::make_move_iterator(free.end()));
+    vector<int8_t> make_free(hand);
+    make_free.insert(make_free.end(), free.begin(), free.end());
     return make_free;
 }

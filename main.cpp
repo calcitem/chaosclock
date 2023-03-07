@@ -8,65 +8,93 @@
 #include <string>
 #include <vector>
 
-#include "position.h"
-#include "types.h"
 #include "misc.h"
 #include "piece.h"
+#include "position.h"
 #include "search.h"
+#include "types.h"
 
 using namespace std;
 
-int main()
+static string pick_child;
+
+// Read position from file
+Position readPositionFromFile()
 {
-    auto start_time = std::chrono::high_resolution_clock::now();
-    // read position
     string pos_start;
     fstream my_file("ccpos.txt");
     getline(my_file, pos_start);
     my_file.close();
-    Position pos = getValue(pos_start);
-    vector<int8_t> pos_board;
+    return getValue(pos_start);
+}
+
+// Print information about the current position
+void printPositionInfo(Position *pos)
+{
+    cout << "board: ";
+    boardCout(pos->board);
+    cout << "depth:" << (int)pos->depth << endl;
+    cout << "player: " << (int)pos->player << endl;
+    cout << "value:" << (int)pos->value << endl;
+    cout << "available move:" << pos->children.size() << endl;
+
+    for (size_t lm = 0; lm < pos->children.size(); lm++) {
+        cout << "  " << lm << ": " << (int)pos->children[lm]->last_move;
+        cout << " (value: " << (int)pos->children[lm]->value << ") ";
+        cout << endl;
+    }
+}
+
+// Let user pick a move and update the current position
+void pickMove(Position *pos)
+{
+    cin >> pick_child;
+    if (pick_child != "-3") {
+        Position *new_pos_child = pos->children[stoi(pick_child)];
+        pos = new_pos_child;
+    }
+}
+
+// Main function
+int main()
+{
+    auto start_time = std::chrono::high_resolution_clock::now();
+
+    // Read position from file
+    Position pos = readPositionFromFile();
+
+    // Search for best move
     pos.pieces_data = piecesValue(pos);
     Position *new_pos = search(&pos);
-    string pick_child;
+
+    // Print some search statistics
     cout << "roll_sum:" << roll_sum << endl;
     cout << "max_depth:" << max_depth << endl;
     cout << "result_sum:" << result_sum << endl;
     cout << endl;
+
     auto end_time = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(
         end_time - start_time);
     std::cout << "Stage 1 took " << duration.count() << " ms" << std::endl;
 
     do {
-        cout << "board: ";
-        boardCout(new_pos->board);
-        cout << "depth:" << (int)new_pos->depth << endl;
-        cout << "player: " << (int)new_pos->player << endl;
-        cout << "value:" << (int)new_pos->value << endl;
-        cout << "available move:" << new_pos->children.size() << endl;
+        // Print information about current position
+        printPositionInfo(new_pos);
 
         start_time = std::chrono::high_resolution_clock::now();
 
-        for (size_t lm = 0; lm < new_pos->children.size(); lm++) {
-            cout << "  " << lm << ": " << (int)new_pos->children[lm]->last_move;
-            cout << " (value: " << (int)new_pos->children[lm]->value << ") ";
-            cout << endl;
-        }
+        // Let user pick a move
+        pickMove(new_pos);
 
         end_time = std::chrono::high_resolution_clock::now();
         duration = std::chrono::duration_cast<std::chrono::milliseconds>(
             end_time - start_time);
         std::cout << "Stage 2 took " << duration.count() << " ms" << std::endl;
 
-        cin >> pick_child;
-        if (pick_child != "-3") {
-            Position *new_pos_child = new_pos->children[stoi(pick_child)];
-            new_pos = new_pos_child;
-        }
     } while (pick_child != "-3");
 
-    // deallocate memory
+    // Deallocate memory
     delete new_pos;
 
     return 0;

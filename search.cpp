@@ -1,30 +1,37 @@
+#include "misc.h"
 #include "piece.h"
 #include "position.h"
 #include "types.h"
-#include "misc.h"
 
 using namespace std;
 
-int roll_sum = 0;
-int max_depth = 0;
-int result_sum = 0;
+int roll_sum = 0;   // number of positions evaluated
+int max_depth = 0;  // maximum depth reached in the search tree
+int result_sum = 0; // number of results generated
 
+/**
+ * @brief Search function for the alpha-beta pruning algorithm
+ *
+ * @param pos Pointer to the current position
+ * @return Pointer to the current position with updated value and children
+ */
 Position *search(Position *pos)
 {
-    pos->value = ifEnd(*pos);
+    pos->value = ifEnd(*pos); // check if the game is over
     for (Position *child : pos->children) {
         delete child;
     }
     pos->children.clear();
     roll_sum++;
-    max_depth = max((int)pos->depth, max_depth);
-    if (pos->depth > 30 || roll_sum > 1.2e7) {
+    max_depth = max((int)pos->depth, max_depth); // update maximum depth
+    if (pos->depth > 30 || roll_sum > 1.2e7) {   // limit the search depth and
+                                               // number of positions evaluated
         return pos;
     }
-    // children
-    if (pos->value > 0) {
+
+    // generate children
+    if (pos->value > 0) { // if the game is over, update the result count
         result_sum++;
-        // appendResult(pos);
     } else {
         vector<int8_t> move = vectorMerge(pos->pieces_data.running,
                                           pos->pieces_data.hand[pos->player]);
@@ -61,32 +68,34 @@ Position *search(Position *pos)
         for (size_t sa = 0; sa < children.size(); sa++) {
             Position *child = search(children[sa]);
             pos->children.emplace_back(child);
-            if ((pos->children[sa]->value == 1 &&
+            if ((pos->children[sa]->value == 1 && // if there is a win position
+                                                  // for the other player
                  pos->children[sa]->player != pos->player) ||
-                (pos->children[sa]->value == 4 &&
+                (pos->children[sa]->value == 4 && // if there is a tie position
                  pos->children[sa]->player == pos->player)) {
                 break;
             }
         }
-        if (move.size() == 0 ||
-            (children.size() == 1 &&
-                pos->pieces_data.dead[1 - pos->player].size() -
-                        children[0]->pieces_data.dead[1 - pos->player].size() >
-                    0)) {
-            if (pos->last_move == 0) {
-                pos->value = 2;
-                for (Position *child : pos->children) {
-                    delete child;
-                }
-                pos->children.clear();
-            } else {
-                Position *pass_pos = new Position(*pos);
-                pass_pos->depth = pos->depth + 1;
+        if (move.size() == 0 ||      // if there are no legal moves
+            (children.size() == 1 && // if there is only one move
+             pos->pieces_data.dead[1 - pos->player].size() -
+                 children[0]->pieces_data.dead[1 - pos->player].size() >
+             0)) {
+        if (pos->last_move == 0) {
+            pos->value = 2;
+            for (Position *child : pos->children) {
+                delete child;
+            }
+            pos->children.clear();
+        } else {
+            Position *pass_pos = new Position(*pos);
+            pass_pos->depth = pos->depth + 1;
                 pass_pos->last_move = 0;
                 pass_pos->player = 1 - pos->player;
                 pos->children.emplace_back(search(pass_pos));
             }
         }
+
         // value
         int max_value = pos->value;
         for (Position *child : pos->children) {
@@ -101,5 +110,6 @@ Position *search(Position *pos)
         }
         pos->value = max_value;
     }
+
     return pos;
 }

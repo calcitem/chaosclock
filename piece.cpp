@@ -1,12 +1,14 @@
-#include <algorithm> // find()
-#include <array>
+#include "piece.h"
+#include "misc.h"
 #include "position.h"
 #include "types.h"
-#include "misc.h"
-#include "piece.h"
+#include <algorithm> // find()
+#include <array>
 
 using namespace std;
 
+// Function to update the free pieces of a player based on their hand and stop
+// pieces
 void makeFree(size_t p, Pieces &new_pieces, const Position &pos)
 {
     vector<int8_t> makefree = vectorMerge(new_pieces.hand[p],
@@ -23,8 +25,10 @@ void makeFree(size_t p, Pieces &new_pieces, const Position &pos)
     }
 }
 
+// Function to update the stock pieces of a player based on their stop pieces
+// and the running pieces on the board
 void makeStock(size_t p, Pieces &new_pieces, const Position &pos,
-               const std::vector<int8_t> &run_pos_sum)
+               const vector<int8_t> &run_pos_sum)
 {
     vector<int8_t> stop_delete;
     for (size_t x = 0; x < new_pieces.stop[p].size(); x++) {
@@ -42,6 +46,8 @@ void makeStock(size_t p, Pieces &new_pieces, const Position &pos,
     }
 }
 
+// Function to update the dead pieces of a player based on their stock pieces
+// and the state of the board
 void makeDead(size_t p, Pieces &new_pieces, const Position &pos)
 {
     vector<int8_t> stock_delete;
@@ -75,6 +81,8 @@ void makeDead(size_t p, Pieces &new_pieces, const Position &pos)
     }
 }
 
+// Function to compute the values of each type of piece for both players based
+// on the current state of the board
 Pieces piecesValue(const Position &pos)
 {
     Pieces new_pieces;
@@ -96,6 +104,7 @@ Pieces piecesValue(const Position &pos)
             }
         }
     }
+
     // free
     makeFree(0, new_pieces, pos);
     makeFree(1, new_pieces, pos);
