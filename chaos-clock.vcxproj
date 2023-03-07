@@ -136,7 +136,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="evaluate.cpp" />
     <ClCompile Include="misc.cpp" />
     <ClCompile Include="position.cpp" />
     <ClCompile Include="main.cpp" />
@@ -150,7 +149,6 @@
     <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="evaluate.h" />
     <ClInclude Include="piece.h" />
     <ClInclude Include="position.h" />
     <ClInclude Include="search.h" />

@@ -12,7 +12,6 @@
 #include "types.h"
 #include "misc.h"
 #include "piece.h"
-#include "evaluate.h"
 #include "search.h"
 
 using namespace std;
@@ -28,7 +27,7 @@ int main()
     Position pos = getValue(pos_start);
     vector<int8_t> pos_board;
     pos.pieces_data = piecesValue(pos);
-    Position *new_pos = roll(&pos);
+    Position *new_pos = search(&pos);
     string pick_child;
     cout << "roll_sum:" << roll_sum << endl;
     cout << "max_depth:" << max_depth << endl;

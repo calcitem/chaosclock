@@ -35,4 +35,6 @@ vector<int8_t> getRunPos(const int8_t (&board)[12], int8_t c);
 
 int ifEnd(const Position &pos);
 
+Position getValue(const string &pos_start);
+
 #endif // POSITION_H

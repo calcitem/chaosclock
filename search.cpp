@@ -2,7 +2,6 @@
 #include "position.h"
 #include "types.h"
 #include "misc.h"
-#include "evaluate.h"
 
 using namespace std;
 
@@ -10,7 +9,7 @@ int roll_sum = 0;
 int max_depth = 0;
 int result_sum = 0;
 
-Position *roll(Position *pos)
+Position *search(Position *pos)
 {
     pos->value = ifEnd(*pos);
     for (Position *child : pos->children) {
@@ -60,7 +59,7 @@ Position *roll(Position *pos)
         }
         // vector<Position *> _children = sortChildren(pos, children);
         for (size_t sa = 0; sa < children.size(); sa++) {
-            Position *child = roll(children[sa]);
+            Position *child = search(children[sa]);
             pos->children.emplace_back(child);
             if ((pos->children[sa]->value == 1 &&
                  pos->children[sa]->player != pos->player) ||
@@ -85,7 +84,7 @@ Position *roll(Position *pos)
                 pass_pos->depth = pos->depth + 1;
                 pass_pos->last_move = 0;
                 pass_pos->player = 1 - pos->player;
-                pos->children.emplace_back(roll(pass_pos));
+                pos->children.emplace_back(search(pass_pos));
             }
         }
         // value
