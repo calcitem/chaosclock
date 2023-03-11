@@ -189,28 +189,34 @@ int8_t getBoardMap(uint64_t board)
 {
     uint32_t key = getBoardMapKey(board);
     uint64_t sb = board << 11;
-    while (board_map[key & 0x7ffffff] << 11 != sb) {
-        if (board_map[key & 0x7ffffff] == 0ll) {
+    uint32_t masked_key = key & 0x7ffffff;
+    while (board_map[masked_key] << 11 != sb) {
+        if (board_map[masked_key] == 0ll) {
             return -1;
         }
         key = key >> 1;
+        masked_key = key & 0x7ffffff;
     }
-    return board_map[key & 0x7ffffff] >> 60;
+    return board_map[masked_key] >> 60;
 }
 
 void setBoardMap(uint64_t board)
 {
     uint32_t key = getBoardMapKey(board);
     uint64_t sb = board << 11;
-    while (board_map[key & 0x7ffffff] << 11 != sb) {
-        if (board_map[key & 0x7ffffff] == 0ll) {
-            board_map[key & 0x7ffffff] = board;
+    uint32_t masked_key = key & 0x7ffffff;
+    uint64_t &board_entry = board_map[masked_key];
+    while (board_entry << 11 != sb) {
+        if (board_entry == 0ll) {
+            board_entry = board;
             return;
         }
         key = key >> 1;
+        masked_key = key & 0x7ffffff;
+        board_entry = board_map[masked_key];
     }
-    board_map[key & 0x7ffffff] &= ~(0xfll << 60);
-    board_map[key & 0x7ffffff] |= board >> 60 << 60;
+    board_entry &= ~(0xfll << 60);
+    board_entry |= board >> 60 << 60;
 }
 
 void coutMovelist(vector<uint8_t> &movelist)
