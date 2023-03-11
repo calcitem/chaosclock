@@ -102,7 +102,7 @@ void coutPieces(uint16_t piece, string c_name = "piece")
 uint64_t *board_map;
 // vector<Position*>board_map[4ll << 28];
 
-uint32_t random_board[12][0xd] = {
+static const uint32_t random_board[12][0xd] = {
     {0, 1804289383, 1505335290, 1205554746, 1968078301, 590011675, 290852541,
      1045618677, 757547896, 444454915, 1215069295, 1989311423, 1687063760},
     {0, 1227918265, 1995168598, 623271449, 319571911, 1086411056, 1857631170,
