@@ -1,76 +1,86 @@
-#include <algorithm> // find()
-#include <bitset>
-#include <chrono>
-#include <fstream>
-#include <iostream>
-#include <iterator> // begin(), end()
-#include <stack>
-#include <string>
-#include <vector>
+#include <ctype.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
 
-using namespace std;
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
 
+// Define a struct called "Pieces"
 struct Pieces
 {
-    uint16_t stick = 0;
-    uint16_t hand = 0;
-    uint16_t free = 0;
-    uint16_t running = 0;
-    uint16_t stop = 0;
-    uint16_t stock = 0;
-    uint16_t dead = 0;
-    uint8_t stick_size = 0;
-    uint8_t hand_size = 0;
-    uint8_t free_size = 0;
-    uint8_t running_size = 0;
-    uint8_t dead_size = 0;
+    uint16_t stick; // A bitmask of the player's sticks on the board
+    uint16_t hand;  // A bitmask of the player's pieces in hand
+    uint16_t free;  // A bitmask of the player's pieces that are not blocked
+    // by the opponent
+    uint16_t running; // A bitmask of the player's pieces that are part of a
+    // run
+    uint16_t stop; // A bitmask of the player's pieces that are blocked by
+    // the opponent
+    uint16_t stock; // A bitmask of the player's pieces that are still in
+    // the stock
+    uint16_t dead; // A bitmask of the player's pieces that have been
+    // captured by the opponent
+    uint8_t stick_size; // The number of sticks the player has on the board
+    uint8_t hand_size;  // The number of pieces the player has in hand
+    uint8_t free_size;  // The number of pieces the player has that are not
+    // blocked by the opponent
+    uint8_t running_size; // The number of pieces the player has that are
+    // part of a run
+    uint8_t dead_size; // The number of pieces the player has that have been
+    // captured by the opponent
 };
 
-struct Position
+typedef struct _Position
 {
-    uint64_t board = 0;
-    vector<Position *> children; // 24 Bytes
-};
+    uint64_t board;
+    struct _Position **children;
+    uint16_t num_children;
+    uint16_t size_children;
+} Position;
 
+// An array representing the movement directions of the pieces on the board
 const uint8_t pos24[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
                          0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
 
-void coutBoard(uint64_t board, string c_name = "ejsoon",
-               bool display_board = true)
+char *strndup(const char *s, size_t n)
 {
-    cout << c_name << "->";
-    cout << "value: ";
-    cout << int(board >> 60);
-    cout << " ; player: ";
-    cout << int((board >> 48) & 1);
-    cout << " ; lastmove: ";
-    cout << int((board >> 49) & 0xf);
-    cout << " ; deep: ";
-    cout << int((board >> 54) & 0xf);
+    size_t len = strnlen(s, n);
+    char *new_s = (char *)malloc(len + 1);
+    if (new_s == NULL)
+        return NULL;
+    memcpy(new_s, s, len);
+    new_s[len] = '\0';
+    return new_s;
+}
+
+// Function to print the current game board
+void coutBoard(uint64_t board, char *c_name, bool display_board)
+{
+    printf("%s->", c_name);
+    printf("value: %d ; player: %d ; lastmove: %d ; deep: %d",
+           (int)(board >> 60), (int)((board >> 48) & 1),
+           (int)((board >> 49) & 0xf), (int)((board >> 54) & 0xf));
     if (display_board) {
-        cout << endl << " ; board: ";
+        printf("\nboard: ");
         for (int i = 0; i < 12; ++i) {
-            cout << int((board >> (i << 2)) & 0xf);
-            cout << ", ";
+            printf("%d, ", (int)((board >> (i << 2)) & 0xf));
         }
     }
-    cout << endl;
+    printf("\n");
 }
 
-void coutPieces(uint16_t piece, string c_name = "piece")
+// Function to print the current pieces
+void coutPieces(uint16_t piece, char *c_name)
 {
-    cout << c_name << ": ";
-    cout << bitset<4>(piece >> 12);
-    cout << " ";
-    cout << bitset<4>(piece >> 8);
-    cout << " ";
-    cout << bitset<4>(piece >> 4);
-    cout << " ";
-    cout << bitset<4>(piece);
-    cout << endl;
+    printf("%s: %d %d %d %d\n", c_name, (int)(piece >> 12),
+           (int)(piece >> 8 & 0xf), (int)(piece >> 4 & 0xf),
+           (int)(piece & 0xf));
 }
 
-// indexOfBoard
+// Function to find the index of a piece on the game board
 int8_t iob(uint64_t board, uint8_t c)
 {
     for (uint8_t i = 0; i < 12; ++i) {
@@ -81,12 +91,13 @@ int8_t iob(uint64_t board, uint8_t c)
     return -1;
 }
 
-// pieceOfBoard
+// Function to get the piece at a specific position on the board
 uint8_t pob(uint64_t board, int8_t c_pos)
 {
     return board >> (c_pos << 2) & 0xf;
 }
 
+// Function to get the bitmask of the positions a piece can move to in a run
 uint16_t getRunPos(uint64_t board, uint8_t c, int8_t c_pos)
 {
     uint16_t run_pos = 0;
@@ -101,13 +112,14 @@ uint16_t getRunPos(uint64_t board, uint8_t c, int8_t c_pos)
     return run_pos;
 }
 
+// Define some macros for use in the piecesValue function
 #define CB ((i ^ player) & 1)
 #define CBI ((~(i ^ player)) & 1)
 #define PCB (((i | p) ^ player) & 1)
 #define PCBI ((~((i | p) ^ player)) & 1)
-Pieces piecesValue(uint64_t board)
+struct Pieces piecesValue(uint64_t board)
 {
-    Pieces new_pieces;
+    struct Pieces new_pieces;
     uint8_t player = (board >> 48) & 1; // 0 is odd, 1 is even
     uint16_t run_pos_sum = 0;
     for (uint8_t i = 0; i < 12; ++i) {
@@ -213,16 +225,17 @@ Pieces piecesValue(uint64_t board)
     return new_pieces;
 }
 
-uint8_t posValue(uint64_t board, const Pieces &pieces_value)
+// Function to compute the value of the current position
+uint8_t posValue(uint64_t board, const struct Pieces *pieces_value)
 {
-    uint8_t my_stick = pieces_value.stick_size & 0xf;
-    uint8_t your_stick = pieces_value.stick_size >> 4;
-    uint8_t my_handle = (pieces_value.hand_size & 0xf) +
-                        (pieces_value.free_size & 0xf);
-    uint8_t your_handle = (pieces_value.hand_size >> 4) +
-                          (pieces_value.free_size >> 4);
-    uint8_t my_dead = pieces_value.dead_size & 0xf;
-    uint8_t your_dead = pieces_value.dead_size >> 4;
+    uint8_t my_stick = pieces_value->stick_size & 0xf;
+    uint8_t your_stick = pieces_value->stick_size >> 4;
+    uint8_t my_handle = (pieces_value->hand_size & 0xf) +
+                        (pieces_value->free_size & 0xf);
+    uint8_t your_handle = (pieces_value->hand_size >> 4) +
+                          (pieces_value->free_size >> 4);
+    uint8_t my_dead = pieces_value->dead_size & 0xf;
+    uint8_t your_dead = pieces_value->dead_size >> 4;
     // two win
     const bool two_win = my_stick + my_handle == 6 &&
                          your_stick + your_handle == 6 &&
@@ -262,12 +275,15 @@ Position *roll(Position *pos, int8_t depth)
 {
     roll_sum++;
     // pos value
-    Pieces pieces_value = piecesValue(pos->board);
-    uint64_t pos_value = posValue(pos->board, pieces_value);
+    struct Pieces pieces_value = piecesValue(pos->board);
+    uint64_t pos_value = posValue(pos->board, &pieces_value);
     pos->board |= pos_value << 60;
-    pos->children.clear();
+    free(pos->children);
+    pos->children = NULL;
+    pos->num_children = 0;
+    pos->size_children = 0;
     // max depth
-    max_depth = max(depth, max_depth);
+    max_depth = MAX(depth, max_depth);
     uint64_t deep = depth;
     pos->board &= ~(0xfll << 54);
     pos->board |= deep << 54;
@@ -299,9 +315,11 @@ Position *roll(Position *pos, int8_t depth)
         uint8_t children_size = hand_size + running_size;
 
         if (children_size <= 1) {
-            pos->children.resize(children_size + 1);
+            pos->children = (Position **)realloc(
+                pos->children, sizeof(Position *) * (children_size + 1));
         } else {
-            pos->children.resize(children_size);
+            pos->children = (Position **)realloc(
+                pos->children, sizeof(Position *) * children_size);
         }
         uint8_t x = 0;
         bool if_win = false;
@@ -309,7 +327,8 @@ Position *roll(Position *pos, int8_t depth)
         for (uint8_t i = 0; i < 12 && !if_win; i += 2) {
             uint64_t c = (i | player) + 1;
             if ((pieces_value.hand << 1 >> c) & 1) {
-                Position *new_pos = new Position();
+                Position *new_pos = (Position *)malloc(sizeof(Position));
+                memset(new_pos, 0, sizeof(Position));
                 new_pos->board = pos->board;
                 uint8_t outc = (new_pos->board << 4 >> (c << 2)) & 0xf;
                 // player
@@ -337,7 +356,8 @@ Position *roll(Position *pos, int8_t depth)
         for (uint8_t i = 0; i < 12 && !if_win; ++i) {
             uint64_t c = i + 1;
             if ((pieces_value.running << 1 >> c) & 1) {
-                Position *new_pos = new Position();
+                Position *new_pos = (Position *)malloc(sizeof(Position));
+                memset(new_pos, 0, sizeof(Position));
                 new_pos->board = pos->board;
                 // player
                 uint64_t next_player = ~player & 1;
@@ -363,7 +383,8 @@ Position *roll(Position *pos, int8_t depth)
             }
         }
         if (if_win) {
-            pos->children.resize(x);
+            pos->num_children = x;
+            pos->size_children = x;
         } else if (children_size <= 1) {
             if (0 == lastmove) {
                 // two lose
@@ -371,7 +392,7 @@ Position *roll(Position *pos, int8_t depth)
                 pos->board |= 2ll << 60;
                 return pos;
             } else {
-                Position *new_pos = new Position();
+                Position *new_pos = malloc(sizeof(Position));
                 new_pos->board = pos->board;
                 // player
                 uint64_t next_player = ~player & 1;
@@ -385,7 +406,8 @@ Position *roll(Position *pos, int8_t depth)
         }
         // value
         uint64_t max_value = pos->board >> 60;
-        for (Position *child : pos->children) {
+        for (uint16_t i = 0; i < pos->num_children; i++) {
+            Position *child = pos->children[i];
             int this_value = child->board >> 60;
             if ((this_value == 4 || this_value == 1) &&
                 ((child->board >> 48) & 1) != player) {
@@ -398,7 +420,8 @@ Position *roll(Position *pos, int8_t depth)
         pos->board &= ~(0xfll << 60);
         pos->board |= max_value << 60;
         // children deep
-        for (Position *child : pos->children) {
+        for (uint16_t i = 0; i < pos->num_children; i++) {
+            Position *child = pos->children[i];
             int this_deep = (child->board >> 54) & 0xf;
             if (deep < this_deep) {
                 deep = this_deep;
@@ -413,96 +436,114 @@ Position *roll(Position *pos, int8_t depth)
 // 1,2,0,4,0,6,7,3,9,10,12,11;1;6
 // 1,2,0,4,0,6,7,3,9,10,12,11;1
 // 1,2,0,4,0,6,7,3,9,10,12,11
-Position initBoard(string pos_start)
+Position *initBoard(char *pos_start)
 {
-    Position *new_position = new Position();
+    Position *new_position = (Position *)malloc(sizeof(Position));
+    memset(new_position, 0, sizeof(Position));
     size_t pos_find, last_pos_find, substr_len;
-    vector<size_t> pos_split;
-    string pos_string;
+    size_t pos_split[2] = {0};
+    size_t pos_split_index= 0;
+    size_t pos_split_size = 0;
+    char *pos_string;
     uint64_t player, last_move;
     pos_find = 0;
-    while (pos_start.find(';', pos_find) != string::npos) {
-        pos_find = pos_start.find(';', pos_find);
-        pos_split.emplace_back(pos_find);
+    while (strchr(pos_start + pos_find, ';') != NULL) {
+        pos_find = strchr(pos_start + pos_find, ';') - pos_start;
+        pos_split[pos_split_index] = pos_find;
+        pos_split_index++;
+        pos_split_size++;
         pos_find++;
     }
-    if (pos_split.size() == 2) {
-        pos_string = pos_start.substr(0, pos_split[0]);
-        player = stoi(pos_start.substr(pos_split[0] + 1, 1));
-        last_move = stoi(pos_start.substr(pos_split[1] + 1));
-    } else if (pos_split.size() == 1) {
-        pos_string = pos_start.substr(0, pos_split[0]);
-        player = stoi(pos_start.substr(pos_split[0] + 1));
+    if (pos_split_size == 2) {
+        strncpy(pos_string, pos_start, pos_split[0]);
+        pos_string[pos_split[0]] = '\0';
+
+        char player_str[2];
+        strncpy(player_str, pos_start + pos_split[0] + 1, 1);
+        player_str[1] = '\0';
+        player = atoi(player_str);
+
+        char last_move_str[2];
+        strncpy(last_move_str, pos_start + pos_split[1] + 1, 1);
+        last_move_str[1] = '\0';
+        last_move = atoi(last_move_str);
+    } else if (pos_split_size == 1) {
+        strncpy(pos_string, pos_start, pos_split[0]);
+        pos_string[pos_split[0]] = '\0';
+
+        player = atoi(pos_start + pos_split[0] + 1);
+        printf("player: %d\n", player);
+
         last_move = -1;
+
+        free(pos_string);
     } else {
-        pos_string = pos_start;
         player = 0;
         last_move = -1;
     }
-    cout << "board: ";
+    printf("board: ");
     pos_find = 0;
     uint64_t c = 0;
     for (uint8_t i = 0; i < 12; i++) {
-        if (pos_start.find(',', pos_find) == string::npos) {
-            c = stoi(pos_start.substr(pos_find));
+        if (strchr(pos_start + pos_find, ',') == NULL) {
+            c = atoi(pos_start + pos_find);
         } else {
             last_pos_find = pos_find;
-            pos_find = pos_start.find(',', pos_find);
+            pos_find = strchr(pos_start + pos_find, ',') - pos_start;
             substr_len = pos_find - last_pos_find;
-            c = stoi(pos_start.substr(last_pos_find, substr_len));
+            c = atoi(pos_start + last_pos_find);
         }
         new_position->board |= (c << (i << 2));
-        cout << (int)c << ", ";
+        printf("%lld", c);
         pos_find++;
     }
-    cout << endl;
-    cout << "player: " << player << endl;
+    printf("\n");
+    printf("player: %lld\n", player);
     new_position->board |= (player << 48);
-    cout << "last_move: " << last_move << endl;
-    new_position->board |= (last_move << 49);
-    cout << endl;
-    return *new_position;
+    printf("last_move: %lld\n", last_move);
+    new_position->board |= ((uint64_t)last_move << 49);
+    printf("\n");
+    return new_position;
 }
 
 int main()
 {
-    auto start_time = std::chrono::high_resolution_clock::now();
+    auto start_time = clock();
 
     // read position
-    string pos_start;
-    fstream my_file("ccpos.txt");
-    getline(my_file, pos_start);
-    my_file.close();
-    Position pos = initBoard(pos_start);
-    Position *result_pos = roll(&pos, 0);
-    string pick_child;
-    cout << "roll_sum:" << roll_sum << endl;
-    cout << "max_depth:" << (int)max_depth << endl;
-    cout << "result_sum:" << result_sum << endl;
-    cout << endl;
+    FILE *fp = fopen("ccpos.txt", "r");
+    char pos_start[1024];
+    fgets(pos_start, 1024, fp);
+    fclose(fp);
 
-    auto end_time = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(
-        end_time - start_time);
-    std::cout << "Stage 1 took " << duration.count() << " ms" << std::endl;
+    Position *pos = initBoard(pos_start);
+    Position *result_pos = roll(pos, 0);
+    char pick_child[100];
+    printf("roll_sum: %d\n", roll_sum);
+    printf("max_depth: %d\n", max_depth);
+    printf("result_sum: %d\n\n", result_sum);
+
+    auto end_time = clock();
+    auto duration = (double)(end_time - start_time) / CLOCKS_PER_SEC;
+    printf("Stage 1 took %f seconds\n", duration);
 
     do {
-        coutBoard(result_pos->board);
-        cout << "available move:" << result_pos->children.size() << endl;
-        for (size_t lm = 0; lm < result_pos->children.size(); lm++) {
-            cout << "  " << lm << ": ";
+        coutBoard(result_pos->board, "ejsoon", true);
+        printf("available move: %d\n", result_pos->num_children);
+        for (uint16_t lm = 0; lm < result_pos->num_children; lm++) {
+            printf("  %d: ", lm);
             coutBoard(result_pos->children[lm]->board, "", false);
         }
-        cin >> pick_child;
-        if (pick_child != "-3") {
-            Position *new_pos_child = result_pos->children[stoi(pick_child)];
+        scanf("%s", pick_child);
+        if (strcmp(pick_child, "-3") != 0) {
+            Position *new_pos_child = result_pos->children[atoi(pick_child)];
             result_pos = new_pos_child;
         }
 
-        end_time = std::chrono::high_resolution_clock::now();
-        duration = std::chrono::duration_cast<std::chrono::milliseconds>(
-            end_time - start_time);
-        std::cout << "Stage 2 took " << duration.count() << " ms" << std::endl;
-    } while (pick_child != "-3");
+        end_time = clock();
+        duration = (double)(end_time - start_time) / CLOCKS_PER_SEC;
+        printf("Stage 2 took %f seconds\n", duration);
+    } while (strcmp(pick_child, "-3") != 0);
+
     return 0;
 }
