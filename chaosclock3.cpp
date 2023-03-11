@@ -2,6 +2,7 @@
 #include <bitset>
 #include <fstream>
 #include <iostream>
+#include <random>
 #include <stack>
 #include <string>
 #include <vector>
@@ -77,22 +78,21 @@ uint32_t random_lastmove[0xd];
 
 void setRandomBoard()
 {
+    std::random_device rd;
+    std::mt19937 mt(rd());
     for (uint32_t i = 0; i < 12; ++i) {
         random_board[i][0] = 0;
         for (uint32_t j = 1; j <= 12; ++j) {
-            srand((i << 4) | j);
-            random_board[i][j] = rand();
+            random_board[i][j] = mt();
         }
     }
     random_lastmove[0] = 0;
     for (uint32_t i = 1; i <= 12; ++i) {
-        srand(i << 4);
-        random_lastmove[i] = rand();
+        random_lastmove[i] = mt();
     }
-    srand(0x0000ffff);
-    random_player[0] = rand();
-    srand(0xffff0000);
-    random_player[1] = rand();
+    std::uniform_int_distribution<uint32_t> dist(0, UINT32_MAX);
+    random_player[0] = dist(mt);
+    random_player[1] = dist(mt);
 }
 
 uint32_t getBoardMapKey(uint64_t board)
