@@ -97,6 +97,22 @@ struct Pieces
     uint8_t dead_size = 0;
 };
 
+typedef struct
+{
+    uint64_t b0 : 4;
+    uint64_t b1 : 4;
+    uint64_t b2 : 4;
+    uint64_t b3 : 4;
+    uint64_t b4 : 4;
+    uint64_t b5 : 4;
+    uint64_t b6 : 4;
+    uint64_t b7 : 4;
+    uint64_t b8 : 4;
+    uint64_t b9 : 4;
+    uint64_t b10 : 4;
+    uint64_t b11 : 4;
+} board_t;
+
 struct Position
 {
     uint64_t board = 0;
@@ -304,13 +320,35 @@ void coutMovelist(vector<uint8_t> &movelist)
 // indexOfBoard
 int8_t iob(uint64_t board, uint8_t c)
 {
-    for (int i = 0; i < 12; ++i) {
-        if (c == (board & 0xf)) {
-            return i;
-        }
-        board >>= 4;
+    board_t *b = (board_t *)&board;
+
+    if (c == b->b0) {
+        return 0;
+    } else if (c == b->b1) {
+        return 1;
+    } else if (c == b->b2) {
+        return 2;
+    } else if (c == b->b3) {
+        return 3;
+    } else if (c == b->b4) {
+        return 4;
+    } else if (c == b->b5) {
+        return 5;
+    } else if (c == b->b6) {
+        return 6;
+    } else if (c == b->b7) {
+        return 7;
+    } else if (c == b->b8) {
+        return 8;
+    } else if (c == b->b9) {
+        return 9;
+    } else if (c == b->b10) {
+        return 10;
+    } else if (c == b->b11) {
+        return 11;
+    } else {
+        return -1;
     }
-    return -1;
 }
 
 // pieceOfBoard
