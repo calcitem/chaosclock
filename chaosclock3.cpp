@@ -1,3 +1,5 @@
+#define _SILENCE_CXX17_POLYMORPHIC_ALLOCATOR_DESTROY_DEPRECATION_WARNING
+
 #include <bitset>
 #include <chrono>
 #include <cstring>
@@ -6,6 +8,9 @@
 #include <stack>
 #include <string>
 #include <vector>
+#include <memory>
+#include <memory_resource>
+#include <array>
 
 using namespace std;
 
@@ -81,6 +86,13 @@ private:
     int p {-1};
 };
 
+struct Position;
+extern std::pmr::polymorphic_allocator<Position> alloc;
+
+std::array<char, 1024 * 1024 * 768> buffer;
+std::pmr::monotonic_buffer_resource mem_pool {buffer.data(), buffer.size()};
+std::pmr::polymorphic_allocator<Position> alloc {&mem_pool};
+
 struct Pieces
 {
     uint16_t stick = 0;
@@ -115,13 +127,16 @@ public:
     ~ObjectPool()
     {
         for (auto obj : m_pool) {
-            delete obj;
+            alloc.destroy(obj);
+            alloc.deallocate(obj, 1);
         }
     }
     Position *acquire()
     {
         if (m_pool.empty()) {
-            return new Position();
+            Position *new_pos = alloc.allocate(1);
+            alloc.construct(new_pos);
+            return new_pos;
         } else {
             auto obj = m_pool.back();
             m_pool.pop_back();
