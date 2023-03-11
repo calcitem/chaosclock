@@ -1,8 +1,6 @@
-#include <algorithm> // find()
 #include <bitset>
 #include <fstream>
 #include <iostream>
-#include <iterator> // begin(), end()
 #include <stack>
 #include <string>
 #include <vector>
@@ -34,7 +32,7 @@ struct Position
 const uint8_t pos24[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
                          0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
 
-void coutBoard(uint64_t board, string c_name = "ejsoon",
+void coutBoard(uint64_t board, string c_name = "roll",
                bool display_board = true)
 {
     cout << c_name << "->";
@@ -44,8 +42,8 @@ void coutBoard(uint64_t board, string c_name = "ejsoon",
     cout << int((board >> 48) & 1);
     cout << " ; lastmove: ";
     cout << int((board >> 49) & 0xf);
-    cout << " ; deep: ";
-    cout << int((board >> 54) & 0xf);
+    cout << " ; maxdeep: ";
+    cout << int((board >> 53) & 0b1111111);
     if (display_board) {
         cout << endl << " ; board: ";
         for (int i = 0; i < 12; ++i) {
@@ -69,6 +67,88 @@ void coutPieces(uint16_t piece, string c_name = "piece")
     cout << endl;
 }
 
+uint64_t *board_map = new uint64_t[1ll << 27];
+// vector<Position*>board_map[4ll << 28];
+
+uint32_t random_board[12][0xd];
+uint32_t random_player[2];
+uint32_t random_lastmove[0xd];
+
+void setRandomBoard()
+{
+    for (uint32_t i = 0; i < 12; ++i) {
+        random_board[i][0] = 0;
+        for (uint32_t j = 1; j <= 12; ++j) {
+            srand((i << 4) | j);
+            random_board[i][j] = rand();
+        }
+    }
+    random_lastmove[0] = 0;
+    for (uint32_t i = 1; i <= 12; ++i) {
+        srand(i << 4);
+        random_lastmove[i] = rand();
+    }
+    srand(0x0000ffff);
+    random_player[0] = rand();
+    srand(0xffff0000);
+    random_player[1] = rand();
+}
+
+uint32_t getBoardMapKey(uint64_t board)
+{
+    // make the key
+    uint32_t key = random_board[0][board & 0xf] ^
+                   random_board[1][(board >> 4) & 0xf] ^
+                   random_board[2][(board >> 8) & 0xf] ^
+                   random_board[3][(board >> 12) & 0xf] ^
+                   random_board[4][(board >> 16) & 0xf] ^
+                   random_board[5][(board >> 20) & 0xf] ^
+                   random_board[6][(board >> 24) & 0xf] ^
+                   random_board[7][(board >> 28) & 0xf] ^
+                   random_board[8][(board >> 32) & 0xf] ^
+                   random_board[9][(board >> 36) & 0xf] ^
+                   random_board[10][(board >> 40) & 0xf] ^
+                   random_board[11][(board >> 44) & 0xf] ^
+                   random_player[(board >> 48) & 1] ^
+                   random_lastmove[(board >> 49) & 0xf];
+    return key;
+}
+
+int8_t getBoardMap(uint64_t board)
+{
+    uint32_t key = getBoardMapKey(board);
+    while (board_map[key & 0x7ffffff] << 11 != board << 11) {
+        if (board_map[key & 0x7ffffff] == 0ll) {
+            return -1;
+        }
+        key = key >> 1;
+    }
+    return board_map[key & 0x7ffffff] >> 60;
+}
+
+void setBoardMap(uint64_t board)
+{
+    uint32_t key = getBoardMapKey(board);
+    while (board_map[key & 0x7ffffff] << 11 != board << 11) {
+        if (board_map[key & 0x7ffffff] == 0ll) {
+            board_map[key & 0x7ffffff] = board;
+            return;
+        }
+        key = key >> 1;
+    }
+    board_map[key & 0x7ffffff] &= ~(0xfll << 60);
+    board_map[key & 0x7ffffff] |= board >> 60 << 60;
+}
+
+void coutMovelist(vector<uint8_t> &movelist)
+{
+    cout << "movelist: ";
+    for (int i = 0; i < movelist.size(); ++i) {
+        cout << (int)movelist[i] << " ";
+    }
+    cout << endl;
+}
+
 // indexOfBoard
 int8_t iob(uint64_t board, uint8_t c)
 {
@@ -89,13 +169,29 @@ uint8_t pob(uint64_t board, int8_t c_pos)
 uint16_t getRunPos(uint64_t board, uint8_t c, int8_t c_pos)
 {
     uint16_t run_pos = 0;
+    bool empty_in_run_pos = true;
+    // while loop next pos
     uint16_t next_pos = pos24[c_pos + c];
-    while (pob(board, next_pos) != next_pos + 1) {
+    uint8_t piece_of_next_pos = pob(board, next_pos);
+    while (piece_of_next_pos != next_pos + 1) {
         run_pos |= (1 << next_pos);
-        if (next_pos == c_pos || c == next_pos + 1) {
+        // run back to start position
+        if (next_pos == c_pos) {
+            if (empty_in_run_pos) {
+                run_pos |= 1 << 15;
+            }
             break;
         }
+        // run into its right position
+        if (c == next_pos + 1) {
+            break;
+        }
+        // empty in the run position
+        if (piece_of_next_pos > 0) {
+            empty_in_run_pos = false;
+        }
         next_pos = pos24[next_pos + c];
+        piece_of_next_pos = pob(board, next_pos);
     }
     return run_pos;
 }
@@ -108,7 +204,9 @@ Pieces piecesValue(uint64_t board)
 {
     Pieces new_pieces;
     uint8_t player = (board >> 48) & 1; // 0 is odd, 1 is even
-    uint16_t run_pos_sum = 0;
+    uint16_t run_pos_sum = 0, run_pos_sum_exp6 = 0;
+    int8_t c6_pos;
+    uint16_t run_empty_loop = 0, run_empty_loop_size = 0;
     for (uint8_t i = 0; i < 12; ++i) {
         uint8_t c = i + 1;
         int8_t c_pos = iob(board, c);
@@ -135,6 +233,13 @@ Pieces piecesValue(uint64_t board)
                 new_pieces.running |= (1 << i);
                 new_pieces.running_size++;
                 run_pos_sum |= c_run_pos;
+                if (c == 6) {
+                    c6_pos = c_pos;
+                } else if (c != 12) {
+                    run_pos_sum_exp6 |= c_run_pos;
+                    run_empty_loop |= c_run_pos >> 15 << c >> 1;
+                    run_empty_loop_size += c_run_pos >> 15;
+                }
             }
         }
     }
@@ -209,6 +314,16 @@ Pieces piecesValue(uint64_t board)
         }
     }
     new_pieces.stock &= ~new_pieces.dead;
+    // remove empty loop
+    new_pieces.running &= ~run_empty_loop;
+    new_pieces.running_size -= run_empty_loop_size;
+    if ((new_pieces.running >> 5) & 1 &&
+        int(run_pos_sum_exp6 & (1 << c6_pos)) == 0 &&
+        int(run_pos_sum_exp6 & (1 << pos24[c6_pos + 6])) == 0 &&
+        int(pob(board, pos24[c6_pos + 6])) == 0) {
+        new_pieces.running &= ~(1 << 5);
+        new_pieces.running_size--;
+    }
     return new_pieces;
 }
 
@@ -229,16 +344,12 @@ uint8_t posValue(uint64_t board, const Pieces &pieces_value)
                           my_stick - your_stick >= -1);
     // I win
     const bool i_win = (my_stick == 6 && your_stick < 6) ||
-                       (my_stick + my_handle == 6 && your_dead > 0) ||
                        (my_stick + my_handle == 6 &&
-                        your_stick + your_handle <= 6 &&
-                        my_stick - your_stick > 0);
+                        (your_dead > 0 || my_stick - your_stick > 0));
     // I lose
     const bool i_lose = (my_stick < 5 && your_stick == 6) ||
-                        (your_stick + your_handle == 6 && my_dead > 0) ||
-                        (my_stick + my_handle <= 6 &&
-                         your_stick + your_handle == 6 &&
-                         your_stick - my_stick > 1);
+                        (your_stick + your_handle == 6 &&
+                         (my_dead > 0 || your_stick - my_stick > 1));
     // two lose
     const bool two_lose = my_dead > 0 && your_dead > 0;
     if (two_win) {
@@ -255,7 +366,7 @@ uint8_t posValue(uint64_t board, const Pieces &pieces_value)
 
 unsigned int roll_sum = 0;
 unsigned int result_sum = 0;
-int8_t max_depth = 0;
+uint64_t max_depth = 0;
 
 Position *roll(Position *pos, int8_t depth)
 {
@@ -264,14 +375,14 @@ Position *roll(Position *pos, int8_t depth)
     Pieces pieces_value = piecesValue(pos->board);
     uint64_t pos_value = posValue(pos->board, pieces_value);
     pos->board |= pos_value << 60;
+    setBoardMap(pos->board);
     pos->children.clear();
-    // max depth
-    max_depth = max(depth, max_depth);
-    uint64_t deep = depth;
-    pos->board &= ~(0xfll << 54);
-    pos->board |= deep << 54;
+    // top max depth
+    max_depth = max(depth, (int8_t)max_depth);
+    pos->board &= ~(0b1111111ll << 53);
+    pos->board |= (uint64_t)depth << 53;
     // end if too much
-    if (depth > 36 || roll_sum > 1.2e7) {
+    if (depth >= 48 || roll_sum >= 1.2e7) {
         return pos;
     }
     // end if has a value
@@ -296,12 +407,7 @@ Position *roll(Position *pos, int8_t depth)
         }
         // children size
         uint8_t children_size = hand_size + running_size;
-
-        if (children_size <= 1) {
-            pos->children.resize(children_size + 1);
-        } else {
-            pos->children.resize(children_size);
-        }
+        pos->children.resize(children_size);
         uint8_t x = 0;
         bool if_win = false;
         // hand's children
@@ -321,12 +427,19 @@ Position *roll(Position *pos, int8_t depth)
                 // lastmove
                 new_pos->board &= ~(0xfll << 49);
                 new_pos->board |= c << 49;
-                // roll
-                pos->children[x] = roll(new_pos, depth + 1);
-                if (pos->children[x]->board >> 60 == 4 &&
-                        next_player == player ||
-                    pos->children[x]->board >> 60 == 1 &&
-                        next_player != player) {
+                // push map
+                int64_t is_set = getBoardMap(new_pos->board);
+                if (is_set == -1) {
+                    pos->children[x] = roll(new_pos, depth + 1);
+                } else {
+                    new_pos->board |= is_set << 60;
+                    pos->children[x] = new_pos;
+                }
+                // if win
+                if ((pos->children[x]->board >> 60 == 4 &&
+                     next_player == player) ||
+                    (pos->children[x]->board >> 60 == 1 &&
+                     next_player != player)) {
                     if_win = true;
                 }
                 x++;
@@ -353,8 +466,15 @@ Position *roll(Position *pos, int8_t depth)
                 // lastmove
                 new_pos->board &= ~(0xfll << 49);
                 new_pos->board |= c << 49;
-                // roll
-                pos->children[x] = roll(new_pos, depth + 1);
+                // push map
+                int64_t is_set = getBoardMap(new_pos->board);
+                if (is_set == -1) {
+                    pos->children[x] = roll(new_pos, depth + 1);
+                } else {
+                    new_pos->board |= is_set << 60;
+                    pos->children[x] = new_pos;
+                }
+                // if win
                 if (pos->children[x]->board >> 60 == 1) {
                     if_win = true;
                 }
@@ -363,48 +483,55 @@ Position *roll(Position *pos, int8_t depth)
         }
         if (if_win) {
             pos->children.resize(x);
-        } else if (children_size <= 1) {
-            if (0 == lastmove) {
-                // two lose
-                pos->board &= ~(0xfll << 60);
-                pos->board |= 2ll << 60;
-                return pos;
-            } else {
-                Position *new_pos = new Position();
-                new_pos->board = pos->board;
-                // player
-                uint64_t next_player = ~player & 1;
-                new_pos->board &= ~(1ll << 48);
-                new_pos->board |= next_player << 48;
-                // lastmove is 0
-                new_pos->board &= ~(0xfll << 49);
-                // roll
-                pos->children[children_size] = roll(new_pos, depth + 1);
+            pos->board &= ~(0xfll << 60);
+            pos->board |= 4ll << 60;
+            setBoardMap(pos->board);
+        } else {
+            if (children_size < 1) {
+                if (0 == lastmove) {
+                    // two lose
+                    pos->board &= ~(0xfll << 60);
+                    pos->board |= 2ll << 60;
+                    return pos;
+                } else {
+                    Position *new_pos = new Position();
+                    new_pos->board = pos->board;
+                    // player
+                    uint64_t next_player = ~player & 1;
+                    new_pos->board &= ~(1ll << 48);
+                    new_pos->board |= next_player << 48;
+                    // lastmove is 0
+                    new_pos->board &= ~(0xfll << 49);
+                    // roll
+                    pos->children.emplace_back(roll(new_pos, depth + 1));
+                }
             }
+            // value
+            uint64_t max_value = pos->board >> 60;
+            for (Position *child : pos->children) {
+                int child_value = child->board >> 60;
+                if ((child_value == 4 || child_value == 1) &&
+                    ((child->board >> 48) & 1) != player) {
+                    child_value = child_value == 4 ? 1 : 4;
+                }
+                if (max_value < child_value) {
+                    max_value = child_value;
+                }
+            }
+            pos->board &= ~(0xfll << 60);
+            pos->board |= max_value << 60;
+            setBoardMap(pos->board);
         }
-        // value
-        uint64_t max_value = pos->board >> 60;
+        // max depth of this pos
+        uint64_t pos_depth = (pos->board >> 53) & 0b1111111;
         for (Position *child : pos->children) {
-            int this_value = child->board >> 60;
-            if ((this_value == 4 || this_value == 1) &&
-                ((child->board >> 48) & 1) != player) {
-                this_value = this_value == 4 ? 1 : 4;
-            }
-            if (max_value < this_value) {
-                max_value = this_value;
+            int child_depth = (child->board >> 53) & 0b1111111;
+            if (pos_depth < child_depth) {
+                pos_depth = child_depth;
             }
         }
-        pos->board &= ~(0xfll << 60);
-        pos->board |= max_value << 60;
-        // children deep
-        for (Position *child : pos->children) {
-            int this_deep = (child->board >> 54) & 0xf;
-            if (deep < this_deep) {
-                deep = this_deep;
-            }
-        }
-        pos->board &= ~(0xfll << 54);
-        pos->board |= deep << 54;
+        pos->board &= ~(0b1111111ll << 53);
+        pos->board |= pos_depth << 53;
     }
     return pos;
 }
@@ -432,11 +559,11 @@ Position initBoard(string pos_start)
     } else if (pos_split.size() == 1) {
         pos_string = pos_start.substr(0, pos_split[0]);
         player = stoi(pos_start.substr(pos_split[0] + 1));
-        last_move = -1;
+        last_move = 0;
     } else {
         pos_string = pos_start;
-        player = 0;
-        last_move = -1;
+        player = 1;
+        last_move = 0;
     }
     cout << "board: ";
     pos_find = 0;
@@ -465,29 +592,55 @@ Position initBoard(string pos_start)
 
 int main()
 {
+    setRandomBoard();
     // read position
     string pos_start;
-    fstream my_file("ccpos.txt");
+    fstream my_file("bcpos.txt");
     getline(my_file, pos_start);
     my_file.close();
     Position pos = initBoard(pos_start);
     Position *result_pos = roll(&pos, 0);
+    delete board_map;
     string pick_child;
     cout << "roll_sum:" << roll_sum << endl;
     cout << "max_depth:" << (int)max_depth << endl;
     cout << "result_sum:" << result_sum << endl;
     cout << endl;
+    // start game
+    stack<Position *> poslist;
+    vector<uint8_t> movelist;
+    int this_depth = 0;
+    poslist.push(result_pos);
     do {
-        coutBoard(result_pos->board);
-        cout << "available move:" << result_pos->children.size() << endl;
-        for (size_t lm = 0; lm < result_pos->children.size(); lm++) {
+        coutMovelist(movelist);
+        coutBoard(poslist.top()->board);
+        cout << "this_depth: " << this_depth;
+        cout << " ; available move:" << poslist.top()->children.size() << endl;
+        for (size_t lm = 0; lm < poslist.top()->children.size(); lm++) {
             cout << "  " << lm << ": ";
-            coutBoard(result_pos->children[lm]->board, "", false);
+            coutBoard(poslist.top()->children[lm]->board, "", false);
         }
+        cout << endl << "select one option: ";
         cin >> pick_child;
-        if (pick_child != "-3") {
-            Position *new_pos_child = result_pos->children[stoi(pick_child)];
-            result_pos = new_pos_child;
+        if (stoi(pick_child) >= 0 &&
+            stoi(pick_child) < poslist.top()->children.size()) {
+            poslist.push(poslist.top()->children[stoi(pick_child)]);
+            movelist.push_back((poslist.top()->board >> 49) & 0xf);
+            this_depth++;
+        } else if (pick_child == "-2") {
+            poslist.pop();
+            movelist.pop_back();
+            this_depth--;
+        } else if (pick_child == "-1") {
+            while (this_depth > 0) {
+                poslist.pop();
+                movelist.pop_back();
+                this_depth--;
+            }
+        } else if (pick_child == "-3") {
+            cout << "Goodbye!" << endl;
+        } else {
+            cout << "Wrong choice, enter again." << endl;
         }
     } while (pick_child != "-3");
     return 0;

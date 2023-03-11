@@ -136,10 +136,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="chaosclock2.cpp" />
+    <ClCompile Include="chaosclock3.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="ccpos.txt" />
+    <Text Include="bcpos.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
