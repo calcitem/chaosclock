@@ -32,6 +32,37 @@ struct Position
     vector<Position *> children; // 24 Bytes
 };
 
+class ObjectPool
+{
+public:
+    ObjectPool(size_t size)
+    {
+        for (size_t i = 0; i < size; i++) {
+            m_pool.push_back(new Position());
+        }
+    }
+    ~ObjectPool()
+    {
+        for (auto obj : m_pool) {
+            delete obj;
+        }
+    }
+    Position *acquire()
+    {
+        if (m_pool.empty()) {
+            return new Position();
+        } else {
+            auto obj = m_pool.back();
+            m_pool.pop_back();
+            return obj;
+        }
+    }
+    void release(Position *obj) { m_pool.push_back(obj); }
+
+private:
+    std::vector<Position *> m_pool;
+};
+
 const uint8_t pos24[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
                          0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
 
@@ -258,6 +289,8 @@ unsigned int roll_sum = 0;
 unsigned int result_sum = 0;
 int8_t max_depth = 0;
 
+ObjectPool pool(100000);
+
 Position *roll(Position *pos, int8_t depth)
 {
     roll_sum++;
@@ -309,7 +342,8 @@ Position *roll(Position *pos, int8_t depth)
         for (uint8_t i = 0; i < 12 && !if_win; i += 2) {
             uint64_t c = (i | player) + 1;
             if ((pieces_value.hand << 1 >> c) & 1) {
-                Position *new_pos = new Position();
+                Position *new_pos = pool.acquire(); // 从对象池中获取一个
+                                                    // Position 对象
                 new_pos->board = pos->board;
                 uint8_t outc = (new_pos->board << 4 >> (c << 2)) & 0xf;
                 // player
@@ -337,7 +371,7 @@ Position *roll(Position *pos, int8_t depth)
         for (uint8_t i = 0; i < 12 && !if_win; ++i) {
             uint64_t c = i + 1;
             if ((pieces_value.running << 1 >> c) & 1) {
-                Position *new_pos = new Position();
+                Position *new_pos = pool.acquire();
                 new_pos->board = pos->board;
                 // player
                 uint64_t next_player = ~player & 1;
@@ -371,7 +405,7 @@ Position *roll(Position *pos, int8_t depth)
                 pos->board |= 2ll << 60;
                 return pos;
             } else {
-                Position *new_pos = new Position();
+                Position *new_pos = pool.acquire();
                 new_pos->board = pos->board;
                 // player
                 uint64_t next_player = ~player & 1;
@@ -406,6 +440,10 @@ Position *roll(Position *pos, int8_t depth)
         }
         pos->board &= ~(0xfll << 54);
         pos->board |= deep << 54;
+
+        for (Position *child : pos->children) {
+            pool.release(child);
+        }
     }
     return pos;
 }
@@ -415,7 +453,7 @@ Position *roll(Position *pos, int8_t depth)
 // 1,2,0,4,0,6,7,3,9,10,12,11
 Position initBoard(string pos_start)
 {
-    Position *new_position = new Position();
+    Position *new_position = pool.acquire();
     size_t pos_find, last_pos_find, substr_len;
     vector<size_t> pos_split;
     string pos_string;
@@ -462,6 +500,8 @@ Position initBoard(string pos_start)
     new_position->board |= (last_move << 49);
     cout << endl;
     return *new_position;
+
+    pool.release(new_position);
 }
 
 int main()
