@@ -188,7 +188,8 @@ uint32_t getBoardMapKey(uint64_t board)
 int8_t getBoardMap(uint64_t board)
 {
     uint32_t key = getBoardMapKey(board);
-    while (board_map[key & 0x7ffffff] << 11 != board << 11) {
+    uint64_t sb = board << 11;
+    while (board_map[key & 0x7ffffff] << 11 != sb) {
         if (board_map[key & 0x7ffffff] == 0ll) {
             return -1;
         }
@@ -200,7 +201,8 @@ int8_t getBoardMap(uint64_t board)
 void setBoardMap(uint64_t board)
 {
     uint32_t key = getBoardMapKey(board);
-    while (board_map[key & 0x7ffffff] << 11 != board << 11) {
+    uint64_t sb = board << 11;
+    while (board_map[key & 0x7ffffff] << 11 != sb) {
         if (board_map[key & 0x7ffffff] == 0ll) {
             board_map[key & 0x7ffffff] = board;
             return;
