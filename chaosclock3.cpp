@@ -1,5 +1,6 @@
 #include <bitset>
 #include <chrono>
+#include <cstring>
 #include <fstream>
 #include <iostream>
 #include <stack>
@@ -7,6 +8,71 @@
 #include <vector>
 
 using namespace std;
+
+template <typename T, size_t capacity = 128>
+class Stack
+{
+public:
+    Stack() {
+    }
+
+    Stack(const Stack &other) { *this = other; }
+
+    ~Stack()
+    {
+    }
+
+    Stack &operator=(const Stack &other)
+    {
+        std::memcpy(arr, other.arr, length());
+        p = other.p;
+        return *this;
+    }
+
+    T &operator[](int i) { return arr[i]; }
+
+    const T &operator[](int i) const { return arr[i]; }
+
+    void push_back(const T &obj)
+    {
+        p++;
+        arr[p] = obj;
+    }
+
+    void pop() { p--; }
+
+    T *top() { return &arr[p]; }
+
+    [[nodiscard]] int size() const { return p + 1; }
+
+    [[nodiscard]] size_t length() const { return sizeof(T) * size(); }
+
+    T *begin() { return &arr[0]; }
+
+    T *end() { return &arr[p + 1]; }
+
+    [[nodiscard]] bool empty() const { return p < 0; }
+
+    void clear() { p = -1; }
+
+    void erase(int index)
+    {
+        for (int i = index; i < p; i++) {
+            arr[i] = arr[i + 1];
+        }
+
+        p--;
+    }
+
+    void resize(size_t size)
+    {
+        p = size - 1;
+    }
+
+private:
+    T arr[capacity];
+    int p {-1};
+};
 
 struct Pieces
 {
@@ -27,7 +93,7 @@ struct Pieces
 struct Position
 {
     uint64_t board = 0;
-    vector<Position *> children; // 24 Bytes
+    Stack<Position *, 12> children; // 24 Bytes
 };
 
 class ObjectPool
@@ -584,15 +650,15 @@ Position *roll(Position *pos, int8_t depth)
                     // lastmove is 0
                     new_pos->board &= ~(0xfll << 49);
                     // roll
-                    pos->children.emplace_back(roll(new_pos, depth + 1));
+                    pos->children.push_back(roll(new_pos, depth + 1));
                 }
             }
             // value
             uint64_t max_value = pos->board >> 60;
-            for (Position *child : pos->children) {
-                int child_value = child->board >> 60;
+            for (int i = 0; i < pos->children.size(); i++) {
+                int child_value = pos->children[i]->board >> 60;
                 if ((child_value == 4 || child_value == 1) &&
-                    ((child->board >> 48) & 1) != player) {
+                    ((pos->children[i]->board >> 48) & 1) != player) {
                     child_value = child_value == 4 ? 1 : 4;
                 }
                 if (max_value < child_value) {
@@ -605,8 +671,8 @@ Position *roll(Position *pos, int8_t depth)
         }
         // max depth of this pos
         uint64_t pos_depth = (pos->board >> 53) & 0b1111111;
-        for (Position *child : pos->children) {
-            int child_depth = (child->board >> 53) & 0b1111111;
+        for (int i = 0; i < pos->children.size(); i++) {
+            int child_depth = (pos->children[i]->board >> 53) & 0b1111111;
             if (pos_depth < child_depth) {
                 pos_depth = child_depth;
             }
@@ -614,8 +680,8 @@ Position *roll(Position *pos, int8_t depth)
         pos->board &= ~(0b1111111ll << 53);
         pos->board |= pos_depth << 53;
 
-        for (Position *child : pos->children) {
-            pool.release(child);
+        for (int i = 0; i < pos->children.size(); i++) {
+            pool.release(pos->children[i]);
         }
     }
     return pos;
