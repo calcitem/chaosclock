@@ -99,7 +99,7 @@ void coutPieces(uint16_t piece, string c_name = "piece")
     cout << endl;
 }
 
-uint64_t *board_map = new uint64_t[1ll << 27];
+uint64_t *board_map;
 // vector<Position*>board_map[4ll << 28];
 
 uint32_t random_board[12][0xd] = {
@@ -666,9 +666,14 @@ int main()
     fstream my_file("bcpos.txt");
     getline(my_file, pos_start);
     my_file.close();
+
+    board_map = new uint64_t[1ll << 27];
+    std::fill(board_map, board_map + (1ll << 27), 0);
+
     Position pos = initBoard(pos_start);
     Position *result_pos = roll(&pos, 0);
     delete board_map;
+
     string pick_child;
     cout << "roll_sum:" << roll_sum << endl;
     cout << "max_depth:" << (int)max_depth << endl;
