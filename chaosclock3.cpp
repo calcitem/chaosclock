@@ -39,6 +39,11 @@ public:
         arr[p] = obj;
     }
 
+    void pop_back()
+    {
+        p--;
+    }
+
     void pop() { p--; }
 
     T *top() { return &arr[p]; }
@@ -50,6 +55,8 @@ public:
     T *begin() { return &arr[0]; }
 
     T *end() { return &arr[p + 1]; }
+
+    T back() { return arr[p]; }
 
     [[nodiscard]] bool empty() const { return p < 0; }
 
@@ -124,7 +131,7 @@ public:
     void release(Position *obj) { m_pool.push_back(obj); }
 
 private:
-    std::vector<Position *> m_pool;
+    Stack<Position *, 100000> m_pool;
 };
 
 const uint8_t pos24[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
