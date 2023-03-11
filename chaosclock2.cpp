@@ -1,5 +1,6 @@
 #include <algorithm> // find()
 #include <bitset>
+#include <chrono>
 #include <fstream>
 #include <iostream>
 #include <iterator> // begin(), end()
@@ -465,6 +466,8 @@ Position initBoard(string pos_start)
 
 int main()
 {
+    auto start_time = std::chrono::high_resolution_clock::now();
+
     // read position
     string pos_start;
     fstream my_file("ccpos.txt");
@@ -477,6 +480,12 @@ int main()
     cout << "max_depth:" << (int)max_depth << endl;
     cout << "result_sum:" << result_sum << endl;
     cout << endl;
+
+    auto end_time = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(
+        end_time - start_time);
+    std::cout << "Stage 1 took " << duration.count() << " ms" << std::endl;
+
     do {
         coutBoard(result_pos->board);
         cout << "available move:" << result_pos->children.size() << endl;
@@ -489,6 +498,11 @@ int main()
             Position *new_pos_child = result_pos->children[stoi(pick_child)];
             result_pos = new_pos_child;
         }
+
+        end_time = std::chrono::high_resolution_clock::now();
+        duration = std::chrono::duration_cast<std::chrono::milliseconds>(
+            end_time - start_time);
+        std::cout << "Stage 2 took " << duration.count() << " ms" << std::endl;
     } while (pick_child != "-3");
     return 0;
 }
