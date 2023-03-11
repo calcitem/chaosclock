@@ -304,8 +304,8 @@ void coutMovelist(vector<uint8_t> &movelist)
 // indexOfBoard
 int8_t iob(uint64_t board, uint8_t c)
 {
-    for (uint8_t i = 0; i < 12; ++i) {
-        if (c == (board >> (i << 2) & 0xf)) {
+    for (int i = 0; i < 12; ++i) {
+        if (c == (board >> ((uint8_t)i << 2) & 0xf)) {
             return i;
         }
     }
