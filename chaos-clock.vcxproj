@@ -136,24 +136,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="misc.cpp" />
-    <ClCompile Include="position.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="piece.cpp" />
-    <ClCompile Include="search.cpp" />
+    <ClCompile Include="chaosclock2.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="ccpos.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="piece.h" />
-    <ClInclude Include="position.h" />
-    <ClInclude Include="search.h" />
-    <ClInclude Include="types.h" />
-    <ClInclude Include="misc.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
