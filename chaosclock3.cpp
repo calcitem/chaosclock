@@ -1,3 +1,4 @@
+#include <chrono>
 #include <bitset>
 #include <fstream>
 #include <iostream>
@@ -593,6 +594,9 @@ Position initBoard(string pos_start)
 int main()
 {
     setRandomBoard();
+
+    auto start_time = std::chrono::high_resolution_clock::now();
+
     // read position
     string pos_start;
     fstream my_file("bcpos.txt");
@@ -611,6 +615,12 @@ int main()
     vector<uint8_t> movelist;
     int this_depth = 0;
     poslist.push(result_pos);
+
+    auto end_time = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(
+    end_time - start_time);
+    std::cout << "Stage 1 took " << duration.count() << " ms" << std::endl;
+
     do {
         coutMovelist(movelist);
         coutBoard(poslist.top()->board);
@@ -642,6 +652,11 @@ int main()
         } else {
             cout << "Wrong choice, enter again." << endl;
         }
+
+        end_time = std::chrono::high_resolution_clock::now();
+        duration = std::chrono::duration_cast<std::chrono::milliseconds>(
+        end_time - start_time);
+        std::cout << "Stage 2 took " << duration.count() << " ms" << std::endl;
     } while (pick_child != "-3");
     return 0;
 }
