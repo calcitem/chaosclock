@@ -9,7 +9,7 @@
 
 using namespace std;
 
-//#define OBJECT_POOL_ENABLED
+#define OBJECT_POOL_ENABLED
 
 template <typename T, size_t capacity = 128>
 class Stack
@@ -739,12 +739,6 @@ Position *roll(Position *pos, int8_t depth)
         }
         pos->board &= ~(0b1111111ll << 53);
         pos->board |= pos_depth << 53;
-
-#ifdef OBJECT_POOL_ENABLED
-        for (int i = 0; i < pos->children.size(); i++) {
-            pool.release(pos->children[i]);
-        }
-#endif
     }
     return pos;
 }
