@@ -383,7 +383,7 @@ int8_t iob(uint64_t board, uint8_t c)
 }
 
 // pieceOfBoard
-uint8_t pob(uint64_t board, int8_t c_pos)
+inline uint8_t pob(uint64_t board, int8_t c_pos)
 {
     return board >> (c_pos << 2) & 0xf;
 }
