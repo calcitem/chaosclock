@@ -123,42 +123,63 @@ struct Position
     Stack<Position *, 12> children; // 24 Bytes
 };
 
+template <typename T>
 class ObjectPool
 {
 public:
     ObjectPool(size_t size)
     {
-        for (size_t i = 0; i < size; i++) {
-            m_pool.push_back(new Position());
+        m_pool = static_cast<T *>(std::malloc(size * sizeof(T)));
+        if (m_pool == nullptr) {
+            throw std::bad_alloc();
         }
+
+        for (size_t i = 0; i < size; i++) {
+            new (&m_pool[i]) Position();
+        }
+
+        m_size = size;
     }
+
     ~ObjectPool()
     {
-        for (auto obj : m_pool) {
+        for (size_t i = 0; i < m_size; i++) {
+            m_pool[i].~T();
+        }
+
+        std::free(m_pool);
+    }
+
+    Position *acquire()
+    {
+        if (m_index < m_size) {
+            return &m_pool[m_index++];
+        } else {
+            count++;
+            return new T();
+        }
+    }
+
+    void release(T *obj)
+    {
+        if (obj >= m_pool && obj < m_pool + m_size) {
+            m_index--;
+            std::swap(*obj, m_pool[m_index]);
+        } else {
+            count--;
             delete obj;
         }
     }
-    Position *acquire()
-    {
-        if (m_pool.empty()) {
-            count++;
-            return new Position();
-        } else {
-            count++;
-            auto obj = m_pool.back();
-            m_pool.pop_back();
-            return obj;
-        }
-    }
-    void release(Position *obj) { m_pool.push_back(obj); }
 
     size_t count {0};
 
 private:
-    Stack<Position *, POOL_SIZE> m_pool;
+    T *m_pool {nullptr};
+    size_t m_size {0};
+    size_t m_index {0};
 };
 
-ObjectPool pool(POOL_SIZE);
+ObjectPool<Position> positionPool(POOL_SIZE);
 
 const uint8_t pos24[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
                          0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
@@ -616,7 +637,7 @@ Position *roll(Position *pos, int8_t depth)
             uint64_t c = (i | player) + 1;
             if ((pieces_value.hand << 1 >> c) & 1) {
 #ifdef OBJECT_POOL_ENABLED                
-                Position *new_pos = pool.acquire();
+                Position *new_pos = positionPool.acquire();
 #else
                 Position *new_pos = new Position();
 #endif
@@ -655,7 +676,7 @@ Position *roll(Position *pos, int8_t depth)
             uint64_t c = i + 1;
             if ((pieces_value.running << 1 >> c) & 1) {
 #ifdef OBJECT_POOL_ENABLED
-                Position *new_pos = pool.acquire();
+                Position *new_pos = positionPool.acquire();
 #else
                 Position *new_pos = new Position();
 #endif
@@ -704,7 +725,7 @@ Position *roll(Position *pos, int8_t depth)
                     return pos;
                 } else {
 #ifdef OBJECT_POOL_ENABLED
-                    Position *new_pos = pool.acquire();
+                    Position *new_pos = positionPool.acquire();
 #else
                     Position *new_pos = new Position();
 #endif
@@ -755,7 +776,7 @@ Position *roll(Position *pos, int8_t depth)
 Position initBoard(string pos_start)
 {
 #ifdef OBJECT_POOL_ENABLED
-    Position *new_position = pool.acquire();
+    Position *new_position = positionPool.acquire();
 #else
     Position *new_position = new Position();
 #endif
@@ -839,9 +860,11 @@ int main()
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(
         end_time - start_time);
     std::cout << "Stage 1 took " << duration.count() << " ms" << std::endl;
-    std::cout << "Object Pool count: " << pool.count << endl;
-    if (pool.count > POOL_SIZE) {
-        cout << "WARNNING: Pool Size is not enough!" << endl;
+
+    if (positionPool.count > 0) {
+        std::cout << "Warning: Insufficient object pool size, consider increasing by "
+                  << positionPool.count
+                  << " bytes!" << endl;
     }
 
     do {
