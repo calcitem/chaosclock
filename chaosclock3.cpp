@@ -11,6 +11,8 @@ using namespace std;
 
 #define OBJECT_POOL_ENABLED
 
+const int POOL_SIZE = 21000000;
+
 template <typename T, size_t capacity = 128>
 class Stack
 {
@@ -139,8 +141,10 @@ public:
     Position *acquire()
     {
         if (m_pool.empty()) {
+            count++;
             return new Position();
         } else {
+            count++;
             auto obj = m_pool.back();
             m_pool.pop_back();
             return obj;
@@ -148,9 +152,13 @@ public:
     }
     void release(Position *obj) { m_pool.push_back(obj); }
 
+    size_t count {0};
+
 private:
-    Stack<Position *, 100000> m_pool;
+    Stack<Position *, POOL_SIZE> m_pool;
 };
+
+ObjectPool pool(POOL_SIZE);
 
 const uint8_t pos24[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
                          0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
@@ -561,8 +569,6 @@ unsigned int roll_sum = 0;
 unsigned int result_sum = 0;
 uint64_t max_depth = 0;
 
-ObjectPool pool(100000);
-
 Position *roll(Position *pos, int8_t depth)
 {
     roll_sum++;
@@ -833,6 +839,10 @@ int main()
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(
         end_time - start_time);
     std::cout << "Stage 1 took " << duration.count() << " ms" << std::endl;
+    std::cout << "Object Pool count: " << pool.count << endl;
+    if (pool.count > POOL_SIZE) {
+        cout << "WARNNING: Pool Size is not enough!" << endl;
+    }
 
     do {
         coutMovelist(movelist);
