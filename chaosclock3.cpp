@@ -9,6 +9,8 @@
 
 using namespace std;
 
+//#define OBJECT_POOL_ENABLED
+
 template <typename T, size_t capacity = 128>
 class Stack
 {
@@ -607,7 +609,11 @@ Position *roll(Position *pos, int8_t depth)
         for (uint8_t i = 0; i < 12 && !if_win; i += 2) {
             uint64_t c = (i | player) + 1;
             if ((pieces_value.hand << 1 >> c) & 1) {
+#ifdef OBJECT_POOL_ENABLED                
                 Position *new_pos = pool.acquire();
+#else
+                Position *new_pos = new Position();
+#endif
                 new_pos->board = pos->board;
                 uint8_t outc = (new_pos->board << 4 >> (c << 2)) & 0xf;
                 // player
@@ -642,7 +648,11 @@ Position *roll(Position *pos, int8_t depth)
         for (uint8_t i = 0; i < 12 && !if_win; ++i) {
             uint64_t c = i + 1;
             if ((pieces_value.running << 1 >> c) & 1) {
+#ifdef OBJECT_POOL_ENABLED
                 Position *new_pos = pool.acquire();
+#else
+                Position *new_pos = new Position();
+#endif
                 new_pos->board = pos->board;
                 // player
                 uint64_t next_player = ~player & 1;
@@ -687,7 +697,11 @@ Position *roll(Position *pos, int8_t depth)
                     pos->board |= 2ll << 60;
                     return pos;
                 } else {
+#ifdef OBJECT_POOL_ENABLED
                     Position *new_pos = pool.acquire();
+#else
+                    Position *new_pos = new Position();
+#endif
                     new_pos->board = pos->board;
                     // player
                     uint64_t next_player = ~player & 1;
@@ -726,9 +740,11 @@ Position *roll(Position *pos, int8_t depth)
         pos->board &= ~(0b1111111ll << 53);
         pos->board |= pos_depth << 53;
 
+#ifdef OBJECT_POOL_ENABLED
         for (int i = 0; i < pos->children.size(); i++) {
             pool.release(pos->children[i]);
         }
+#endif
     }
     return pos;
 }
@@ -738,7 +754,11 @@ Position *roll(Position *pos, int8_t depth)
 // 1,2,0,4,0,6,7,3,9,10,12,11
 Position initBoard(string pos_start)
 {
+#ifdef OBJECT_POOL_ENABLED
     Position *new_position = pool.acquire();
+#else
+    Position *new_position = new Position();
+#endif
     size_t pos_find, last_pos_find, substr_len;
     vector<size_t> pos_split;
     string pos_string;
